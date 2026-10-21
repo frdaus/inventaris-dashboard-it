@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Inventory Dashboard</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand"><span>Kimia Farma Inventaris</span></div>
+        <p class="menu-label">MENU UTAMA</p>
+        <a class="nav active" href="/">▦ Dashboard</a>
+        <div class="sidebar-note">
+            <strong>Asset Management</strong>
+            <p>Monitoring inventaris IT dalam satu dashboard.</p>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">ASSET MANAGEMENT</p>
+                <h1>Dashboard Inventaris</h1>
+                <p class="subtitle">Ringkasan dan pengelolaan aset IT</p>
+            </div>
+            <div class="avatar">IT</div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="notice {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <section class="stats">
+            <article class="stat-card">
+                <div class="stat-icon purple">▣</div>
+                <p>Total Unit Aset</p>
+                <h2>{{ stats.total_unit }}</h2>
+                <small>{{ stats.total_jenis }} jenis aset terdaftar</small>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon green">✓</div>
+                <p>Kondisi Baik</p>
+                <h2>{{ stats.unit_baik }}</h2>
+                <small>Unit dalam kondisi baik</small>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon red">!</div>
+                <p>Kondisi Rusak</p>
+                <h2>{{ stats.unit_rusak }}</h2>
+                <small>Unit membutuhkan tindak lanjut</small>
+            </article>
+
+            <article class="stat-card">
+                <div class="stat-icon orange">⚙</div>
+                <p>Maintenance</p>
+                <h2>{{ stats.unit_maintenance }}</h2>
+                <small>Unit dalam pemeliharaan</small>
+            </article>
+        </section>
+
+        <section class="content-grid">
+            <article class="panel chart-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Aset per Kategori</h3>
+                        <p>Jumlah unit berdasarkan kategori</p>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </article>
+
+            <article class="panel form-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h3>Tambah Aset</h3>
+                        <p>Masukkan data inventaris baru</p>
+                    </div>
+                </div>
+
+                <form action="{{ url_for('tambah_aset') }}"
+                      method="POST" class="asset-form">
+                    <label>Kode Aset *
+                        <input name="kode_aset" maxlength="30"
+                               placeholder="Contoh: AST-001" required>
+                    </label>
+
+                    <label>Nama Barang *
+                        <input name="nama_barang" maxlength="100"
+                               placeholder="Contoh: Laptop Dell" required>
+                    </label>
+
+                    <label>Kategori *
+                        <input name="kategori" maxlength="50"
+                               placeholder="Laptop, Network, Server..." required>
+                    </label>
+
+                    <label>Lokasi
+                        <input name="lokasi" maxlength="100"
+                               placeholder="Contoh: Ruang IT">
+                    </label>
+
+                    <div class="form-row">
+                        <label>Jumlah *
+                            <input type="number" name="jumlah"
+                                   min="1" value="1" required>
+                        </label>
+
+                        <label>Kondisi
+                            <select name="kondisi">
+                                <option>Baik</option>
+                                <option>Rusak</option>
+                                <option>Maintenance</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <label>Tanggal Masuk
+                        <input type="date" name="tanggal_masuk">
+                    </label>
+
+                    <button class="primary-button" type="submit">
+                        + Simpan Aset
+                    </button>
+                </form>
+            </article>
+        </section>
+
+        <section class="panel table-panel">
+            <div class="table-header">
+                <div>
+                    <h3>Data Inventaris</h3>
+                    <p>Daftar aset dari database MySQL</p>
+                </div>
+
+                <form class="search-form" method="GET" action="/">
+                    <input type="search" name="q" value="{{ search }}"
+                           placeholder="Cari aset, kategori, lokasi...">
+                    <button type="submit" class="secondary-button">
+                        Cari
+                    </button>
+                    {% if search %}
+                        <a class="clear-link" href="/">Reset</a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode Aset</th>
+                            <th>Nama Barang</th>
+                            <th>Kategori</th>
+                            <th>Lokasi</th>
+                            <th>Jumlah</th>
+                            <th>Kondisi</th>
+                            <th>Tanggal Masuk</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for asset in assets %}
+                        <tr>
+                            <td class="asset-code">
+                                {{ asset.kode_aset }}
+                            </td>
+                            <td>{{ asset.nama_barang }}</td>
+                            <td>{{ asset.kategori }}</td>
+                            <td>{{ asset.lokasi or '-' }}</td>
+                            <td>{{ asset.jumlah }}</td>
+                            <td>
+                                <span class="status status-{{ asset.kondisi|lower }}">
+                                    {{ asset.kondisi or 'Belum diisi' }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ asset.tanggal_masuk or '-' }}
+                            </td>
+                            <td>
+    <div style="display:flex; gap:6px;">
+        <a href="{{ url_for('edit_aset', asset_id=asset.id) }}"
+           class="edit-button">Edit</a>
+
+        <form method="POST"
+              action="{{ url_for('hapus_aset', asset_id=asset.id) }}"
+              onsubmit="return confirm('Yakin ingin menghapus aset ini?')">
+            <button type="submit" class="delete-button">Hapus</button>
+        </form>
+    </div>
+</td>
+                                        
+                                   
+                                
+                      
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                {% if search %}
+                                    Tidak ada aset yang cocok dengan pencarian.
+                                {% else %}
+                                    Belum ada data inventaris. Tambahkan aset
+                                    menggunakan formulir di atas.
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="table-footer">
+                Menampilkan {{ assets|length }} baris aset
+            </p>
+        </section>
+
+        <footer>IT Inventory Dashboard · Local Development</footer>
+    </main>
+
+    <script>
+        const categoryData = {{ category_data | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>

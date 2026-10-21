@@ -1,0 +1,43 @@
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: inventaris-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: inventaris_db
+      MYSQL_USER: inventaris_app
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD belum diatur}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD belum diatur}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backup.sql:/docker-entrypoint-initdb.d/01-backup.sql:ro
+    networks:
+      - inventaris-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  web:
+    build: .
+    container_name: inventaris-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - inventaris-net
+
+volumes:
+  mysql_data:
+
+networks:
+  inventaris-net:
+    driver: bridge

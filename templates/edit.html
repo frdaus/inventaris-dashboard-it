@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Aset</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="main" style="margin-left:0; max-width:800px;">
+        <section class="panel">
+            <h1>Edit Data Aset</h1>
+            <p class="subtitle">Perbarui informasi inventaris.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="notice {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endwith %}
+
+            <form method="POST" class="asset-form">
+                <label>Kode Aset *
+                    <input name="kode_aset" maxlength="30"
+                           value="{{ asset.kode_aset }}" required>
+                </label>
+
+                <label>Nama Barang *
+                    <input name="nama_barang" maxlength="100"
+                           value="{{ asset.nama_barang }}" required>
+                </label>
+
+                <label>Kategori *
+                    <input name="kategori" maxlength="50"
+                           value="{{ asset.kategori }}" required>
+                </label>
+
+                <label>Lokasi
+                    <input name="lokasi" maxlength="100"
+                           value="{{ asset.lokasi or '' }}">
+                </label>
+
+                <div class="form-row">
+                    <label>Jumlah *
+                        <input type="number" name="jumlah" min="1"
+                               value="{{ asset.jumlah }}" required>
+                    </label>
+
+                    <label>Kondisi
+                        <select name="kondisi">
+                            {% for option in ['Baik', 'Rusak', 'Maintenance'] %}
+                                <option value="{{ option }}"
+                                    {% if asset.kondisi == option %}selected{% endif %}>
+                                    {{ option }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                </div>
+
+                <label>Tanggal Masuk
+                    <input type="date" name="tanggal_masuk"
+                           value="{{ asset.tanggal_masuk or '' }}">
+                </label>
+
+                <button type="submit" class="primary-button">
+                    Simpan Perubahan
+                </button>
+
+                <a href="{{ url_for('dashboard') }}">Kembali ke Dashboard</a>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

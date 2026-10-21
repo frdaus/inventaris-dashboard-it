@@ -1,0 +1,33 @@
+# Rahasia dan konfigurasi lokal
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Backup dan data database
+backups/
+backup.sql
+*.sql
+*.sql.tmp
+
+# Log dan file sementara
+*.log
+*.tmp
+
+# File cadangan lokal
+app.py.backup
+
+# Database dan file backup
+backups/
+*.sql
+*.sql.tmp
+
+# File Python sementara
+*.pyc
+
+# File cadangan kode lokal
+*.backup
