@@ -34,3 +34,5 @@ backups/
 
 # Folder backup tambahan
 /Backup 2/
+
+*.sebelum-rate-limit
