@@ -26,11 +26,20 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      REDIS_URL: redis://redis:6379/0
     ports:
       - "5000:5000"
     depends_on:
       mysql:
         condition: service_healthy
+    networks:
+      - inventaris-net
+  redis:
+    image: redis:7-alpine
+    container_name: inventaris-redis
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
     networks:
       - inventaris-net
 

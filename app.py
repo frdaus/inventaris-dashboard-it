@@ -3,13 +3,24 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import pymysql
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
-
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 load_dotenv()
 
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true",
+)
 
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    storage_uri=os.getenv("REDIS_URL", "redis://redis:6379/0"),
+)
 if not app.secret_key:
     raise RuntimeError("FLASK_SECRET_KEY belum diatur di file .env")
 
@@ -38,6 +49,7 @@ def login_required(view):
 
 
 @app.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"])
 def login():
     if "admin_id" in session:
         return redirect(url_for("dashboard"))
@@ -65,7 +77,6 @@ def login():
             session["admin_id"] = admin["id"]
             session["admin_username"] = admin["username"]
             return redirect(url_for("dashboard"))
-
         return render_template(
             "login.html",
             error="Username atau password salah."
