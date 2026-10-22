@@ -27,6 +27,10 @@
                 <p class="subtitle">Ringkasan dan pengelolaan aset IT</p>
             </div>
             <div class="avatar">IT</div>
+            <form method="POST" action="{{ url_for('logout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="secondary-button">Logout</button>
+            </form>
         </header>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -88,6 +92,7 @@
 
                 <form action="{{ url_for('tambah_aset') }}"
                       method="POST" class="asset-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <label>Kode Aset *
                         <input name="kode_aset" maxlength="30"
                                placeholder="Contoh: AST-001" required>
@@ -193,6 +198,7 @@
         <form method="POST"
               action="{{ url_for('hapus_aset', asset_id=asset.id) }}"
               onsubmit="return confirm('Yakin ingin menghapus aset ini?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="delete-button">Hapus</button>
         </form>
     </div>

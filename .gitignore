@@ -36,3 +36,6 @@ backups/
 /Backup 2/
 
 *.sebelum-rate-limit
+
+# Local backups before CSRF changes
+*.sebelum-csrf

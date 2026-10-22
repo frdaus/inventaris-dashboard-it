@@ -5,3 +5,5 @@ gunicorn
 PyMySQL
 Flask-Limiter
 redis
+
+Flask-WTF

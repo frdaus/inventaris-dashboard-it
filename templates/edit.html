@@ -20,6 +20,7 @@
             {% endwith %}
 
             <form method="POST" class="asset-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <label>Kode Aset *
                     <input name="kode_aset" maxlength="30"
                            value="{{ asset.kode_aset }}" required>

@@ -1,4 +1,5 @@
 import os
+from flask_wtf.csrf import CSRFProtect
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import pymysql
 from dotenv import load_dotenv
@@ -15,7 +16,7 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=os.getenv("SESSION_COOKIE_SECURE", "false").lower() == "true",
 )
-
+csrf = CSRFProtect(app)
 limiter = Limiter(
     key_func=get_remote_address,
     app=app,
