@@ -21,6 +21,12 @@ limiter = Limiter(
     app=app,
     storage_uri=os.getenv("REDIS_URL", "redis://redis:6379/0"),
 )
+@app.errorhandler(429)
+def ratelimit_handler(error):
+    return render_template(
+        "login.html",
+        error="Terlalu banyak percobaan login. Silakan tunggu sekitar satu menit sebelum mencoba kembali."
+    ), 429
 if not app.secret_key:
     raise RuntimeError("FLASK_SECRET_KEY belum diatur di file .env")
 
