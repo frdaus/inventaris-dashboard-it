@@ -10,7 +10,7 @@
 </head>
 <body>
     <aside class="sidebar">
-        <div class="brand"><span>Kimia Farma Inventaris</span></div>
+        <div class="brand"><span>IT Inventaris</span></div>
         <p class="menu-label">MENU UTAMA</p>
         <a class="nav active" href="/">▦ Dashboard</a>
         <div class="sidebar-note">
@@ -20,17 +20,27 @@
     </aside>
 
     <main class="main">
-        <header class="topbar">
-            <div>
-                <p class="eyebrow">ASSET MANAGEMENT</p>
-                <h1>Dashboard Inventaris</h1>
-                <p class="subtitle">Ringkasan dan pengelolaan aset IT</p>
+                <header class="topbar">
+            <div class="topbar-brand">
+                <div class="avatar" aria-hidden="true">IT</div>
+                <div class="topbar-copy">
+                    <p class="eyebrow">ASSET MANAGEMENT</p>
+                    <h1>Dashboard Inventaris</h1>
+                    <p class="subtitle">Ringkasan dan pengelolaan aset IT</p>
+                </div>
             </div>
-            <div class="avatar">IT</div>
-            <form method="POST" action="{{ url_for('logout') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="secondary-button">Logout</button>
-            </form>
+
+            <div class="topbar-actions">
+                <button type="button" id="theme-toggle"
+                        class="secondary-button" aria-pressed="false">
+                    🌙 Mode Gelap
+                </button>
+
+                <form class="logout-form" method="POST" action="{{ url_for('logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="secondary-button">Logout</button>
+                </form>
+            </div>
         </header>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -146,16 +156,52 @@
                     <p>Daftar aset dari database MySQL</p>
                 </div>
 
-                <form class="search-form" method="GET" action="/">
-                    <input type="search" name="q" value="{{ search }}"
-                           placeholder="Cari aset, kategori, lokasi...">
-                    <button type="submit" class="secondary-button">
-                        Cari
-                    </button>
-                    {% if search %}
-                        <a class="clear-link" href="/">Reset</a>
-                    {% endif %}
-                </form>
+                
+
+<form class="search-form" method="GET" action="/">
+    <div class="filter-field">
+        <label for="filter-q">Cari Aset</label>
+        <input id="filter-q" type="search" name="q"
+               value="{{ search }}"
+               placeholder="Kode, nama, atau lokasi...">
+    </div>
+
+    <div class="filter-field">
+        <label for="filter-kategori">Kategori</label>
+        <select id="filter-kategori" name="kategori">
+            <option value="">Semua Kategori</option>
+            {% for item in categories %}
+                <option value="{{ item.kategori }}"
+                    {% if kategori_filter == item.kategori %}selected{% endif %}>
+                    {{ item.kategori }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="filter-field">
+        <label for="filter-kondisi">Kondisi</label>
+        <select id="filter-kondisi" name="kondisi">
+            <option value="">Semua Kondisi</option>
+            {% for item in ['Baik', 'Rusak', 'Maintenance'] %}
+                <option value="{{ item }}"
+                    {% if kondisi_filter == item %}selected{% endif %}>
+                    {{ item }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="secondary-button">
+        Cari / Filter
+    </button>
+
+    {% if search or kategori_filter or kondisi_filter %}
+        <a class="clear-link" href="/">Reset</a>
+    {% endif %}
+</form>
+
+
             </div>
 
             <div class="table-wrap">
@@ -223,9 +269,34 @@
                     </tbody>
                 </table>
             </div>
-            <p class="table-footer">
-                Menampilkan {{ assets|length }} baris aset
-            </p>
+            
+<div class="table-footer pagination-footer">
+    <p>
+        Menampilkan {{ start_item }}–{{ end_item }}
+        dari {{ total_assets }} aset
+    </p>
+
+    <nav class="pagination" aria-label="Navigasi halaman">
+        {% if page > 1 %}
+            <a href="{{ url_for('dashboard', page=page-1, q=search, kategori=kategori_filter, kondisi=kondisi_filter) }}"
+               class="page-link">‹ Sebelumnya</a>
+        {% else %}
+            <span class="page-link disabled">‹ Sebelumnya</span>
+        {% endif %}
+
+        <span class="page-indicator">
+            Halaman {{ page }} dari {{ total_pages }}
+        </span>
+
+        {% if page < total_pages %}
+            <a href="{{ url_for('dashboard', page=page+1, q=search, kategori=kategori_filter, kondisi=kondisi_filter) }}"
+               class="page-link">Berikutnya ›</a>
+        {% else %}
+            <span class="page-link disabled">Berikutnya ›</span>
+        {% endif %}
+    </nav>
+</div>
+
         </section>
 
         <footer>IT Inventory Dashboard · Local Development</footer>

@@ -70,7 +70,16 @@ body {
 .main {
     margin-left: 235px;
     padding: 32px;
-    max-width: 1800px;
+    width: calc(100% - 235px);
+    max-width: none;
+}
+
+.main > * {
+    width: 100%;
+    max-width: 1600px;
+    margin-right: auto;
+    margin-left: auto;
+
 }
 
 .topbar,
@@ -835,5 +844,466 @@ footer {
         scroll-behavior: auto !important;
         transition: none !important;
         animation: none !important;
+    }
+}
+
+/* ===== Header dashboard: modern IT branding ===== */
+.topbar {
+    align-items: stretch;
+    gap: 18px;
+}
+
+.topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex: 1;
+    min-width: 0;
+    padding: 16px 20px 16px 0;
+    background: linear-gradient(135deg, #edf2ff, #ffffff);
+    border: 1px solid #dfe7fb;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.avatar {
+    flex: 0 0 76px;
+    width: 76px;
+    height: 84px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 0 18px 18px 0;
+    background: linear-gradient(145deg, #243b83, #496be8);
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 18px #243b8326;
+    position: relative;
+}
+
+.avatar::after {
+    content: "";
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    right: 10px;
+    top: 10px;
+    border-radius: 50%;
+    background: #9df0ca;
+    border: 2px solid #ffffff;
+}
+
+.topbar-copy {
+    min-width: 0;
+}
+
+.topbar-copy .eyebrow {
+    margin: 0 0 6px;
+    color: #536bd0;
+}
+
+.topbar-copy h1 {
+    margin: 0;
+    font-size: clamp(22px, 2.4vw, 29px);
+    line-height: 1.2;
+}
+
+.topbar-copy .subtitle {
+    margin-top: 7px;
+}
+
+.logout-form {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+}
+
+.logout-form .secondary-button {
+    padding: 11px 17px;
+    border: 1px solid #d7e1f7;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #29458f;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px #1720330d;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.logout-form .secondary-button:hover {
+    background: #edf2ff;
+    transform: translateY(-1px);
+}
+
+/* Penyesuaian layar HP */
+@media (max-width: 700px) {
+    .topbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .topbar-brand {
+        gap: 12px;
+        padding-right: 12px;
+    }
+
+    .avatar {
+        flex-basis: 62px;
+        width: 62px;
+        height: 76px;
+    }
+
+    .topbar-copy h1 {
+        font-size: 22px;
+    }
+
+    .logout-form {
+        justify-content: flex-end;
+    }
+}
+/* ===== DARK MODE ===== */
+:root {
+    color-scheme: light;
+    --page-bg: #f4f6fb;
+    --panel-bg: #ffffff;
+    --text-main: #172033;
+    --text-muted: #7b8497;
+    --border-color: #e2e8f2;
+    --table-head-bg: #f2f5fb;
+    --table-row-alt: #fafbfe;
+    --table-row-hover: #f0f4ff;
+    --input-bg: #ffffff;
+    --input-text: #172033;
+}
+
+body {
+    background: var(--page-bg);
+    color: var(--text-main);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.stat-card,
+.panel {
+    background: var(--panel-bg);
+    border-color: var(--border-color);
+}
+
+h1, h3,
+.asset-form label {
+    color: var(--text-main);
+}
+
+.subtitle,
+.panel-heading p,
+.table-header p,
+.stat-card p,
+.stat-card small,
+.table-footer,
+footer {
+    color: var(--text-muted);
+}
+
+input,
+select {
+    background: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+}
+
+th {
+    background: var(--table-head-bg);
+}
+
+td {
+    color: var(--text-main);
+}
+
+th, td {
+    border-bottom-color: var(--border-color);
+}
+
+tbody tr:nth-child(even) {
+    background: var(--table-row-alt);
+}
+
+tbody tr:hover {
+    background: var(--table-row-hover);
+}
+
+.topbar-brand {
+    background: linear-gradient(135deg, #edf2ff, #ffffff);
+    border-color: #dfe7fb;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+body.dark-mode {
+    color-scheme: dark;
+    --page-bg: #0b1120;
+    --panel-bg: #151f32;
+    --text-main: #e6edf7;
+    --text-muted: #a2afc4;
+    --border-color: #2b3950;
+    --table-head-bg: #1d2a40;
+    --table-row-alt: #182439;
+    --table-row-hover: #24344e;
+    --input-bg: #101a2b;
+    --input-text: #e6edf7;
+}
+
+body.dark-mode .topbar-brand {
+    background: linear-gradient(135deg, #192944, #151f32);
+    border-color: #2b3950;
+}
+
+body.dark-mode .topbar-copy h1,
+body.dark-mode .topbar-copy .subtitle {
+    color: var(--text-main);
+}
+
+body.dark-mode .topbar-copy .eyebrow {
+    color: #a9baff;
+}
+
+body.dark-mode .logout-form .secondary-button,
+body.dark-mode #theme-toggle {
+    background: #24344e;
+    color: #e6edf7;
+    border-color: #394a65;
+}
+
+body.dark-mode .logout-form .secondary-button:hover,
+body.dark-mode #theme-toggle:hover {
+    background: #304461;
+}
+
+body.dark-mode .asset-code,
+body.dark-mode .clear-link {
+    color: #a9baff;
+}
+
+body.dark-mode .edit-button {
+    background: #26365a;
+    color: #c3d0ff;
+}
+
+body.dark-mode .delete-button {
+    background: #48272f;
+    color: #ffb8c0;
+}
+
+body.dark-mode .status-baik {
+    background: #173d32;
+    color: #8ce0b7;
+}
+
+body.dark-mode .status-rusak {
+    background: #49252d;
+    color: #ffb8c0;
+}
+
+body.dark-mode .status-maintenance {
+    background: #49371f;
+    color: #ffd08a;
+}
+
+body.dark-mode .notice.success {
+    background: #173d32;
+    color: #8ce0b7;
+    border-color: #28654e;
+}
+
+body.dark-mode .notice.error {
+    background: #49252d;
+    color: #ffb8c0;
+    border-color: #793c47;
+}
+
+body.dark-mode .avatar {
+    box-shadow: none;
+}
+
+@media (max-width: 700px) {
+    .topbar-actions {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+}
+/* Perbaikan posisi label Tambah Aset */
+.form-panel .asset-form {
+    width: 100%;
+    min-width: 0;
+}
+
+.form-panel .asset-form > label,
+.form-panel .asset-form .form-row > label {
+    justify-self: stretch;
+    text-align: left;
+    margin-left: 0;
+    padding-left: 0;
+    width: 100%;
+    min-width: 0;
+}
+
+.form-panel .asset-form input,
+.form-panel .asset-form select {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+}
+
+/* ===== Filter inventaris yang lebih rapi ===== */
+.search-form {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.5fr)
+                           minmax(140px, 1fr)
+                           minmax(140px, 1fr)
+                           auto auto;
+    gap: 12px;
+    align-items: end;
+    flex: 1;
+    min-width: 0;
+}
+
+.search-form .filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.search-form .filter-field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted, #7b8497);
+}
+
+.search-form input,
+.search-form select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color, #e7ebf3);
+    border-radius: 9px;
+    background: var(--card-bg, #ffffff);
+    color: var(--text-main, #172033);
+    font: inherit;
+    font-size: 13px;
+}
+
+.search-form input:focus,
+.search-form select:focus {
+    outline: 2px solid #4563e9;
+    outline-offset: 1px;
+}
+
+.search-form .secondary-button {
+    min-height: 42px;
+    white-space: nowrap;
+}
+
+.search-form .clear-link {
+    align-self: center;
+    padding: 10px 4px;
+}
+
+@media (max-width: 1100px) {
+    .search-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    .search-form .filter-field:first-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 560px) {
+    .search-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .search-form .filter-field:first-child {
+        grid-column: auto;
+    }
+
+    .search-form button,
+    .search-form .clear-link {
+        justify-self: start;
+    }
+}
+
+/* ===== Pagination inventaris ===== */
+.pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 16px 24px;
+}
+
+.pagination-footer p {
+    margin: 0;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color, #e7ebf3);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text-main, #172033);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+a.page-link:hover {
+    border-color: #4563e9;
+    color: #4563e9;
+}
+
+.page-link.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.page-indicator {
+    font-size: 12px;
+    color: var(--text-muted, #7b8497);
+}
+
+body.dark-mode .page-link {
+    background: #1d2b50;
+    color: #fff;
+    border-color: #344366;
+}
+
+@media (max-width: 560px) {
+    .pagination-footer {
+        padding: 14px 18px;
+        align-items: flex-start;
+        flex-direction: column;
     }
 }

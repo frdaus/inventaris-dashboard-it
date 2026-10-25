@@ -98,14 +98,32 @@ def logout():
     return redirect(url_for("login"))
 
 
+
+
 @app.route("/")
 @login_required
 def dashboard():
     search = request.args.get("q", "").strip()
+    kategori_filter = request.args.get("kategori", "").strip()
+    kondisi_filter = request.args.get("kondisi", "").strip()
+
+    # Pagination: 10 aset per halaman
+    try:
+        page = max(1, int(request.args.get("page", 1)))
+    except (TypeError, ValueError):
+        page = 1
+
+    per_page = 10
+
+    # Validasi pilihan kondisi
+    kondisi_valid = ("Baik", "Rusak", "Maintenance")
+    if kondisi_filter not in kondisi_valid:
+        kondisi_filter = ""
 
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
+            # Statistik seluruh aset
             cursor.execute("""
                 SELECT
                     COUNT(*) AS total_jenis,
@@ -120,6 +138,7 @@ def dashboard():
             """)
             stats = cursor.fetchone()
 
+            # Grafik seluruh kategori
             cursor.execute("""
                 SELECT kategori, SUM(jumlah) AS total
                 FROM aset
@@ -128,38 +147,95 @@ def dashboard():
             """)
             category_data = cursor.fetchall()
 
+            # Daftar kategori untuk dropdown
+            cursor.execute("""
+                SELECT DISTINCT kategori
+                FROM aset
+                WHERE kategori IS NOT NULL AND kategori != ''
+                ORDER BY kategori ASC
+            """)
+            categories = cursor.fetchall()
+
+            # Bangun kondisi filter sekali untuk COUNT dan SELECT
+            conditions = []
+            filter_params = []
+
+            if search:
+                conditions.append("""
+                    (kode_aset LIKE %s
+                    OR nama_barang LIKE %s
+                    OR kategori LIKE %s
+                    OR lokasi LIKE %s)
+                """)
+                keyword = f"%{search}%"
+                filter_params.extend([keyword] * 4)
+
+            if kategori_filter:
+                conditions.append("kategori = %s")
+                filter_params.append(kategori_filter)
+
+            if kondisi_filter:
+                conditions.append("kondisi = %s")
+                filter_params.append(kondisi_filter)
+
+            where_sql = ""
+            if conditions:
+                where_sql = " WHERE " + " AND ".join(conditions)
+
+            # Hitung total hasil yang sesuai filter
+            cursor.execute(
+                "SELECT COUNT(*) AS total FROM aset" + where_sql,
+                filter_params
+            )
+            total_assets = cursor.fetchone()["total"]
+
+            total_pages = max(
+                1, (total_assets + per_page - 1) // per_page
+            )
+
+            # Jika halaman melebihi halaman terakhir, sesuaikan
+            page = min(page, total_pages)
+            offset = (page - 1) * per_page
+
+            # Ambil hanya aset pada halaman aktif
             sql = """
                 SELECT id, kode_aset, nama_barang, kategori,
                        lokasi, jumlah, kondisi, tanggal_masuk
                 FROM aset
+            """ + where_sql + """
+                ORDER BY id DESC
+                LIMIT %s OFFSET %s
             """
-            params = []
 
-            if search:
-                sql += """
-                    WHERE kode_aset LIKE %s
-                       OR nama_barang LIKE %s
-                       OR kategori LIKE %s
-                       OR lokasi LIKE %s
-                """
-                keyword = f"%{search}%"
-                params = [keyword, keyword, keyword, keyword]
-
-            sql += " ORDER BY id DESC"
-
-            cursor.execute(sql, params)
+            cursor.execute(
+                sql, filter_params + [per_page, offset]
+            )
             assets = cursor.fetchall()
 
     finally:
         conn.close()
+
+    start_item = offset + 1 if total_assets else 0
+    end_item = offset + len(assets)
 
     return render_template(
         "index.html",
         stats=stats,
         assets=assets,
         category_data=category_data,
-        search=search
+        categories=categories,
+        search=search,
+        kategori_filter=kategori_filter,
+        kondisi_filter=kondisi_filter,
+        page=page,
+        per_page=per_page,
+        total_assets=total_assets,
+        total_pages=total_pages,
+        start_item=start_item,
+        end_item=end_item
     )
+
+
 
 
 @app.route("/tambah", methods=["POST"])
