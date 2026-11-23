@@ -31,6 +31,10 @@ backups/
 
 # File cadangan kode lokal
 *.backup
+*.backup-*
+*.bak
+*.before-*
+*.sebelum-*
 
 # Folder backup tambahan
 /Backup 2/

@@ -195,6 +195,10 @@
     <button type="submit" class="secondary-button">
         Cari / Filter
     </button>
+          <a class="secondary-button export-button"
+       href="{{ url_for('export_excel', q=search, kategori=kategori_filter, kondisi=kondisi_filter) }}">
+        <span aria-hidden="true">📥</span> Export Excel
+    </a>
 
     {% if search or kategori_filter or kondisi_filter %}
         <a class="clear-link" href="/">Reset</a>

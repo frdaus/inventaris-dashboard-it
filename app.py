@@ -1,7 +1,13 @@
+import json
 import os
 from flask_wtf.csrf import CSRFProtect
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import pymysql
+from io import BytesIO
+from datetime import date, datetime
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from flask import send_file
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 from flask_limiter import Limiter
@@ -43,6 +49,43 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor,
         charset="utf8mb4"
     )
+
+def write_audit_log(
+    cursor,
+    action,
+    asset_id,
+    asset_code,
+    asset_name,
+    description=None
+):
+    """
+    Menyimpan aktivitas admin ke tabel audit_logs.
+    Dipanggil menggunakan cursor dari transaksi CRUD yang sama.
+    """
+    admin_id = session.get("admin_id")
+    username = session.get("admin_username", "unknown")
+
+    cursor.execute("""
+        INSERT INTO audit_logs (
+            admin_id,
+            username,
+            action,
+            asset_id,
+            asset_code,
+            asset_name,
+            description
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (
+        admin_id,
+        username,
+        action,
+        asset_id,
+        asset_code,
+        asset_name,
+        description
+    ))
+
 
 from functools import wraps
 
@@ -237,6 +280,116 @@ def dashboard():
 
 
 
+@app.route("/export/excel")
+@login_required
+def export_excel():
+    search = request.args.get("q", "").strip()
+    kategori_filter = request.args.get("kategori", "").strip()
+    kondisi_filter = request.args.get("kondisi", "").strip()
+
+    # Validasi kondisi agar sesuai pilihan dashboard
+    if kondisi_filter not in ("Baik", "Rusak", "Maintenance"):
+        kondisi_filter = ""
+
+    conditions = []
+    params = []
+
+    if search:
+        conditions.append("""
+            (kode_aset LIKE %s
+             OR nama_barang LIKE %s
+             OR kategori LIKE %s
+             OR lokasi LIKE %s)
+        """)
+        keyword = f"%{search}%"
+        params.extend([keyword] * 4)
+
+    if kategori_filter:
+        conditions.append("kategori = %s")
+        params.append(kategori_filter)
+
+    if kondisi_filter:
+        conditions.append("kondisi = %s")
+        params.append(kondisi_filter)
+
+    where_sql = ""
+    if conditions:
+        where_sql = " WHERE " + " AND ".join(conditions)
+
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT kode_aset, nama_barang, kategori, lokasi,
+                       jumlah, kondisi, tanggal_masuk
+                FROM aset
+            """ + where_sql + """
+                ORDER BY id DESC
+            """, params)
+            assets = cursor.fetchall()
+    finally:
+        conn.close()
+
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Data Inventaris"
+
+    headers = [
+        "Kode Aset", "Nama Barang", "Kategori", "Lokasi",
+        "Jumlah", "Kondisi", "Tanggal Masuk"
+    ]
+    sheet.append(headers)
+
+    # Format header
+    for cell in sheet[1]:
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill(
+            fill_type="solid", fgColor="1F3A5F"
+        )
+        cell.alignment = Alignment(horizontal="center")
+
+    for asset in assets:
+        tanggal = asset["tanggal_masuk"]
+        if isinstance(tanggal, (date, datetime)):
+            tanggal = tanggal.strftime("%Y-%m-%d")
+        elif tanggal is None:
+            tanggal = ""
+
+        sheet.append([
+            asset["kode_aset"],
+            asset["nama_barang"],
+            asset["kategori"],
+            asset["lokasi"] or "",
+            asset["jumlah"],
+            asset["kondisi"] or "",
+            tanggal
+        ])
+
+    # Lebar kolom agar mudah dibaca
+    widths = [18, 28, 20, 24, 12, 18, 18]
+    for index, width in enumerate(widths, start=1):
+        sheet.column_dimensions[
+            sheet.cell(row=1, column=index).column_letter
+        ].width = width
+
+    sheet.freeze_panes = "A2"
+    sheet.auto_filter.ref = sheet.dimensions
+
+    output = BytesIO()
+    workbook.save(output)
+    output.seek(0)
+
+    filename = "data_inventaris.xlsx"
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=filename,
+        mimetype=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        )
+    )
 
 @app.route("/tambah", methods=["POST"])
 @login_required
@@ -276,31 +429,83 @@ def tambah_aset():
                 kode_aset, nama_barang, kategori, lokasi,
                 jumlah, kondisi, tanggal_masuk
             ))
+
+            asset_id = cursor.lastrowid
+
+            write_audit_log(
+                cursor=cursor,
+                action="CREATE",
+                asset_id=asset_id,
+                asset_code=kode_aset,
+                asset_name=nama_barang,
+                description="Menambahkan aset baru."
+            )
+
         conn.commit()
         flash("Aset berhasil ditambahkan.", "success")
 
     except pymysql.err.IntegrityError:
         conn.rollback()
         flash("Kode aset sudah digunakan. Gunakan kode yang berbeda.", "error")
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         conn.close()
 
     return redirect(url_for("dashboard"))
+
 
 
 @app.route("/hapus/<int:asset_id>", methods=["POST"])
 @login_required
 def hapus_aset(asset_id):
     conn = get_db_connection()
+
     try:
         with conn.cursor() as cursor:
-            cursor.execute("DELETE FROM aset WHERE id = %s", (asset_id,))
+            cursor.execute(
+                "SELECT * FROM aset WHERE id = %s FOR UPDATE",
+                (asset_id,)
+            )
+            before = cursor.fetchone()
+
+            if before is None:
+                flash("Aset tidak ditemukan.", "error")
+                return redirect(url_for("dashboard"))
+
+            description = json.dumps(
+                {"deleted": before},
+                ensure_ascii=False,
+                default=str
+            )
+
+            cursor.execute(
+                "DELETE FROM aset WHERE id = %s",
+                (asset_id,)
+            )
+
+            write_audit_log(
+                cursor=cursor,
+                action="DELETE",
+                asset_id=asset_id,
+                asset_code=before["kode_aset"],
+                asset_name=before["nama_barang"],
+                description=description
+            )
+
         conn.commit()
-        flash("Aset berhasil dihapus jika datanya ditemukan.", "success")
+        flash("Aset berhasil dihapus.", "success")
+
+    except Exception:
+        conn.rollback()
+        raise
+
     finally:
         conn.close()
 
     return redirect(url_for("dashboard"))
+
 @app.route("/edit/<int:asset_id>", methods=["GET", "POST"])
 @login_required
 def edit_aset(asset_id):
@@ -332,6 +537,16 @@ def edit_aset(asset_id):
                     flash("Kondisi aset tidak valid.", "error")
                     return redirect(url_for("edit_aset", asset_id=asset_id))
 
+                cursor.execute(
+                    "SELECT * FROM aset WHERE id=%s FOR UPDATE",
+                    (asset_id,)
+                )
+                before = cursor.fetchone()
+
+                if before is None:
+                    flash("Aset tidak ditemukan.", "error")
+                    return redirect(url_for("dashboard"))
+
                 cursor.execute("""
                     UPDATE aset
                     SET kode_aset=%s,
@@ -346,6 +561,30 @@ def edit_aset(asset_id):
                     kode_aset, nama_barang, kategori, lokasi,
                     jumlah, kondisi, tanggal_masuk, asset_id
                 ))
+
+                cursor.execute(
+                    "SELECT * FROM aset WHERE id=%s",
+                    (asset_id,)
+                )
+                after = cursor.fetchone()
+
+                description = json.dumps(
+                    {
+                        "before": before,
+                        "after": after
+                    },
+                    ensure_ascii=False,
+                    default=str
+                )
+
+                write_audit_log(
+                    cursor=cursor,
+                    action="UPDATE",
+                    asset_id=asset_id,
+                    asset_code=after["kode_aset"],
+                    asset_name=after["nama_barang"],
+                    description=description
+                )
 
                 conn.commit()
                 flash("Data aset berhasil diperbarui.", "success")
@@ -363,8 +602,14 @@ def edit_aset(asset_id):
         conn.rollback()
         flash("Kode aset sudah digunakan aset lain.", "error")
         return redirect(url_for("edit_aset", asset_id=asset_id))
+
+    except Exception:
+        conn.rollback()
+        raise
+
     finally:
         conn.close()
+
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
