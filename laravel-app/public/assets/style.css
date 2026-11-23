@@ -1953,3 +1953,182 @@ body.dark-mode .status-selesai {
         padding-left: 18px;
     }
 }
+
+/* Label QR dan barcode */
+.table-wrap .label-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 58px;
+    min-height: 34px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #e3f5f8;
+    color: #176f7d;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.table-wrap .label-button:hover {
+    background: #cdebf0;
+}
+
+body.dark-mode .table-wrap .label-button {
+    background: #1d3d4a;
+    color: #9ce5ef;
+}
+
+.label-page-body {
+    min-height: 100vh;
+    background: #edf1f8;
+}
+
+.label-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 32px 16px;
+}
+
+.label-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    width: 70mm;
+    max-width: 100%;
+}
+
+.label-controls a {
+    padding: 11px 14px;
+    border-radius: 8px;
+    color: #354db0;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.label-controls button {
+    margin: 0;
+}
+
+.asset-label {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 24mm minmax(0, 1fr);
+    align-items: center;
+    gap: 2mm;
+    width: 70mm;
+    height: 40mm;
+    padding: 2mm;
+    overflow: hidden;
+    border: 1px solid #dce2ec;
+    border-radius: 3mm;
+    background: #ffffff;
+    color: #172033;
+    box-shadow: 0 8px 24px #17203318;
+}
+
+.label-qr {
+    display: grid;
+    place-items: center;
+}
+
+.label-qr img {
+    display: block;
+    width: 23mm;
+    height: 23mm;
+    image-rendering: pixelated;
+}
+
+.label-info {
+    display: grid;
+    align-content: center;
+    min-width: 0;
+    gap: 1mm;
+}
+
+.label-brand {
+    margin: 0;
+    color: #66748c;
+    font-size: 5.5pt;
+    font-weight: 800;
+    letter-spacing: 0.6pt;
+}
+
+.label-info h1 {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0;
+    color: #172033;
+    font-size: 8pt;
+    line-height: 1.2;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.label-asset-code {
+    overflow: hidden;
+    color: #172033;
+    font-size: 8pt;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.label-barcode {
+    display: block;
+    width: 100%;
+    height: 8mm;
+}
+
+.label-barcode-value {
+    overflow: hidden;
+    color: #172033;
+    font-family: monospace;
+    font-size: 5.5pt;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@page {
+    size: 70mm 40mm;
+    margin: 0;
+}
+
+@media print {
+    html,
+    body,
+    .label-page-body {
+        width: 70mm;
+        height: 40mm;
+        min-height: 0;
+        margin: 0;
+        padding: 0;
+        background: #ffffff;
+    }
+
+    .label-controls {
+        display: none;
+    }
+
+    .label-page {
+        display: block;
+        width: 70mm;
+        height: 40mm;
+        margin: 0;
+        padding: 0;
+    }
+
+    .asset-label {
+        width: 70mm;
+        height: 40mm;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        break-inside: avoid;
+    }
+}

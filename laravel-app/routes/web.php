@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssetLabelController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MaintenanceController;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,9 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard');
     Route::get('/dashboard/statistics', [InventoryController::class, 'statistics'])
         ->name('dashboard.statistics');
+    Route::get('/aset/{asset_id}/label', [AssetLabelController::class, 'show'])
+        ->whereNumber('asset_id')
+        ->name('asset.label');
     Route::get('/maintenance', [MaintenanceController::class, 'index'])
         ->name('maintenance.index');
     Route::post('/maintenance', [MaintenanceController::class, 'store'])

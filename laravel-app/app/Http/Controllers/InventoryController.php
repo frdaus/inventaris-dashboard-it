@@ -399,6 +399,7 @@ class InventoryController extends Controller
                 'required',
                 'string',
                 'max:30',
+                'regex:/^[\x20-\x7E]+$/D',
                 Rule::unique('aset', 'kode_aset')->ignore($asset?->id),
             ],
             'nama_barang' => ['required', 'string', 'max:100'],
@@ -434,6 +435,7 @@ class InventoryController extends Controller
             'kode_aset.unique' => $asset
                 ? 'Kode aset sudah digunakan aset lain.'
                 : 'Kode aset sudah digunakan. Gunakan kode yang berbeda.',
+            'kode_aset.regex' => 'Kode aset hanya boleh berisi karakter ASCII agar QR dan barcode dapat dicetak.',
             'jumlah.min' => $asset
                 ? 'Jumlah harus minimal 1.'
                 : 'Jumlah harus berupa bilangan bulat minimal 1.',

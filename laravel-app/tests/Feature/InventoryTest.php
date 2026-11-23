@@ -37,6 +37,58 @@ class InventoryTest extends TestCase
 
         $this->get(route('maintenance.index'))
             ->assertRedirect(route('login'));
+
+        $this->get(route('asset.label', 1))
+            ->assertRedirect(route('login'));
+    }
+
+    #[Test]
+    public function authenticated_users_can_print_qr_and_code128_labels_for_an_asset(): void
+    {
+        $this->actingAs($this->admin);
+        $asset = Asset::create([
+            'kode_aset' => 'AST-QR-001',
+            'nama_barang' => 'Laptop Dell',
+            'kategori' => 'Komputer',
+            'jumlah' => 1,
+            'kondisi' => 'Baik',
+        ]);
+
+        $this->get(route('asset.label', $asset->id))
+            ->assertOk()
+            ->assertSee('Laptop Dell')
+            ->assertSee('AST-QR-001')
+            ->assertSee('data:image/png;base64,', false)
+            ->assertSee('data:image/svg+xml;base64,', false)
+            ->assertSee('Cetak Label');
+    }
+
+    #[Test]
+    public function asset_codes_with_non_ascii_characters_are_rejected_for_code128_labels(): void
+    {
+        $this->actingAs($this->admin);
+
+        $this->from(route('dashboard'))
+            ->post(route('tambah_aset'), [
+                'kode_aset' => 'AST-Ñ-001',
+                'nama_barang' => 'Laptop',
+                'kategori' => 'Komputer',
+                'jumlah' => 1,
+                'kondisi' => 'Baik',
+            ])
+            ->assertRedirect(route('dashboard'))
+            ->assertSessionHasErrors(['kode_aset']);
+
+        $asset = Asset::create([
+            'kode_aset' => 'AST-Ñ-OLD',
+            'nama_barang' => 'Aset Lama',
+            'kategori' => 'Komputer',
+            'jumlah' => 1,
+            'kondisi' => 'Baik',
+        ]);
+
+        $this->get(route('asset.label', $asset->id))
+            ->assertStatus(422);
     }
 
     #[Test]
@@ -175,6 +227,7 @@ class InventoryTest extends TestCase
             ->assertOk()
             ->assertSee('Dashboard Inventaris')
             ->assertSee('AST-001')
+            ->assertSee('Label')
             ->assertSee('Nomor Seri')
             ->assertSee('Garansi Sampai')
             ->assertSee('Komputer');

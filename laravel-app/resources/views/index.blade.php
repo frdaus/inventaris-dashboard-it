@@ -368,6 +368,9 @@
                                 <td>{{ $asset->tanggal_masuk?->format('Y-m-d') ?? '-' }}</td>
                                 <td>
                                     <div style="display:flex; gap:6px;">
+                                        <a href="{{ route('asset.label', $asset->id) }}"
+                                           class="label-button" target="_blank" rel="noopener"
+                                           aria-label="Cetak label {{ $asset->kode_aset }}">Label</a>
                                         <a href="{{ route('edit_aset', $asset->id) }}"
                                            class="edit-button">Edit</a>
                                         <form method="POST"
