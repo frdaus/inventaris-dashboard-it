@@ -1807,3 +1807,149 @@ body.dark-mode .stats-section .stat-card small {
         font-size: 22px;
     }
 }
+
+/* Riwayat pemeliharaan */
+.maintenance-form-panel {
+    margin-bottom: 22px;
+}
+
+.maintenance-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+}
+
+.maintenance-form > label:nth-of-type(3),
+.maintenance-form > .form-row,
+.maintenance-form > .primary-button {
+    grid-column: 1 / -1;
+}
+
+.maintenance-form textarea {
+    width: 100%;
+    min-width: 0;
+    resize: vertical;
+    padding: 11px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--input-text);
+    font: inherit;
+    font-size: 13px;
+}
+
+.maintenance-form textarea:focus {
+    outline: 2px solid #c6d2ff;
+    border-color: #687de0;
+}
+
+.maintenance-history-panel {
+    overflow: hidden;
+    padding: 24px 0 15px;
+}
+
+.maintenance-history-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px 18px;
+}
+
+.maintenance-history-heading p {
+    margin: 7px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.maintenance-table th,
+.maintenance-table td {
+    white-space: nowrap;
+}
+
+.maintenance-table .maintenance-description {
+    min-width: 220px;
+    max-width: 360px;
+    white-space: normal;
+    line-height: 1.5;
+}
+
+.maintenance-table .maintenance-description small,
+.maintenance-table td small {
+    color: var(--text-muted);
+}
+
+.maintenance-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status-dijadwalkan {
+    background: #e9edff;
+    color: #354db0;
+}
+
+.status-berlangsung {
+    background: #fff0dc;
+    color: #a9660d;
+}
+
+.status-selesai {
+    background: #e2f8ec;
+    color: #16834e;
+}
+
+.maintenance-status-form {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 220px;
+}
+
+.maintenance-status-form select {
+    min-width: 120px;
+    padding: 8px 9px;
+}
+
+.maintenance-status-form .secondary-button {
+    padding: 9px 11px;
+    white-space: nowrap;
+}
+
+body.dark-mode .status-dijadwalkan {
+    background: #26385d;
+    color: #c3d0ff;
+}
+
+body.dark-mode .status-berlangsung {
+    background: #49371f;
+    color: #ffd08a;
+}
+
+body.dark-mode .status-selesai {
+    background: #173d32;
+    color: #8ce0b7;
+}
+
+@media (max-width: 700px) {
+    .maintenance-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .maintenance-form > label,
+    .maintenance-form > .form-row,
+    .maintenance-form > .primary-button {
+        grid-column: 1;
+    }
+
+    .maintenance-history-panel {
+        padding-top: 18px;
+    }
+
+    .maintenance-history-heading {
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+}

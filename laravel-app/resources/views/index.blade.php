@@ -13,6 +13,7 @@
         <div class="brand"><span>IT Inventaris</span></div>
         <p class="menu-label">MENU UTAMA</p>
         <a class="nav active" href="{{ route('dashboard') }}">▦ Dashboard</a>
+        <a class="nav" href="{{ route('maintenance.index') }}">🔧 Kelola Pemeliharaan</a>
         <div class="sidebar-note">
             <strong>Asset Management</strong>
             <p>Monitoring inventaris IT dalam satu dashboard.</p>

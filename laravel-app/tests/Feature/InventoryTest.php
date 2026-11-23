@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Admin;
 use App\Models\Asset;
+use App\Models\MaintenanceRecord;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Test;
@@ -33,6 +34,89 @@ class InventoryTest extends TestCase
 
         $this->get(route('dashboard.statistics'))
             ->assertRedirect(route('login'));
+
+        $this->get(route('maintenance.index'))
+            ->assertRedirect(route('login'));
+    }
+
+    #[Test]
+    public function administrators_can_record_and_update_maintenance_without_changing_asset_condition(): void
+    {
+        $this->actingAs($this->admin);
+        $asset = Asset::create([
+            'kode_aset' => 'AST-MAINT-001',
+            'nama_barang' => 'Laptop',
+            'kategori' => 'Komputer',
+            'jumlah' => 1,
+            'kondisi' => 'Rusak',
+        ]);
+
+        $this->get(route('maintenance.index'))
+            ->assertOk()
+            ->assertSee('Catat Pemeliharaan')
+            ->assertSee('AST-MAINT-001');
+
+        $this->post(route('maintenance.store'), [
+            'asset_id' => $asset->id,
+            'maintenance_date' => '2026-11-20',
+            'description' => 'Mengganti baterai',
+            'technician' => 'Tim IT',
+            'cost' => '125000.00',
+            'status' => 'Berlangsung',
+            'notes' => 'Menunggu uji daya',
+        ])->assertRedirect(route('maintenance.index'));
+
+        $record = MaintenanceRecord::firstOrFail();
+        $this->assertDatabaseHas('maintenance_records', [
+            'id' => $record->id,
+            'asset_id' => $asset->id,
+            'asset_code' => 'AST-MAINT-001',
+            'asset_name' => 'Laptop',
+            'status' => 'Berlangsung',
+        ]);
+
+        $this->patch(route('maintenance.status', $record), [
+            'status' => 'Selesai',
+        ])->assertRedirect(route('maintenance.index'));
+
+        $this->assertDatabaseHas('maintenance_records', [
+            'id' => $record->id,
+            'status' => 'Selesai',
+        ]);
+        $this->assertDatabaseHas('aset', [
+            'id' => $asset->id,
+            'kondisi' => 'Rusak',
+        ]);
+    }
+
+    #[Test]
+    public function maintenance_history_keeps_asset_snapshot_when_asset_is_deleted(): void
+    {
+        $this->actingAs($this->admin);
+        $asset = Asset::create([
+            'kode_aset' => 'AST-MAINT-002',
+            'nama_barang' => 'Switch',
+            'kategori' => 'Network',
+            'jumlah' => 1,
+            'kondisi' => 'Baik',
+        ]);
+        $record = MaintenanceRecord::create([
+            'asset_id' => $asset->id,
+            'asset_code' => $asset->kode_aset,
+            'asset_name' => $asset->nama_barang,
+            'maintenance_date' => '2026-11-21',
+            'description' => 'Membersihkan perangkat',
+            'status' => 'Selesai',
+        ]);
+
+        $asset->delete();
+
+        $this->assertDatabaseHas('maintenance_records', [
+            'id' => $record->id,
+            'asset_id' => null,
+            'asset_code' => 'AST-MAINT-002',
+            'asset_name' => 'Switch',
+        ]);
     }
 
     #[Test]

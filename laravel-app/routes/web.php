@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\MaintenanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -16,6 +17,13 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard');
     Route::get('/dashboard/statistics', [InventoryController::class, 'statistics'])
         ->name('dashboard.statistics');
+    Route::get('/maintenance', [MaintenanceController::class, 'index'])
+        ->name('maintenance.index');
+    Route::post('/maintenance', [MaintenanceController::class, 'store'])
+        ->name('maintenance.store');
+    Route::patch('/maintenance/{record}/status', [MaintenanceController::class, 'updateStatus'])
+        ->whereNumber('record')
+        ->name('maintenance.status');
     Route::post('/logout', [InventoryController::class, 'logout'])
         ->name('logout');
     Route::get('/export/excel', [InventoryController::class, 'exportExcel'])
