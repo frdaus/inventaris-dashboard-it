@@ -2177,3 +2177,141 @@ body.dark-mode .table-wrap .label-button {
         break-inside: avoid;
     }
 }
+
+/* Header dashboard bergaya hero */
+.topbar {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    place-items: center;
+    min-height: 330px;
+    margin-bottom: 30px;
+    padding: 82px 28px 42px;
+    overflow: hidden;
+    border: 1px solid #dfe7fb;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #edf2ff 0%, #f7f9fd 58%, #e8edfa 100%);
+    box-shadow: 0 18px 40px #24365b12;
+}
+
+.topbar-brand {
+    display: block;
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 760px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    text-align: center;
+}
+
+.topbar-copy .eyebrow {
+    margin: 0 0 10px;
+    color: #526be0;
+}
+
+.topbar-copy h1 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 44px);
+    letter-spacing: -1.3px;
+    line-height: 1.15;
+}
+
+.topbar-copy .subtitle {
+    margin-top: 12px;
+    color: #63708a;
+    font-size: 17px;
+}
+
+.topbar-actions {
+    position: absolute;
+    top: 22px;
+    right: 24px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar-actions .secondary-button {
+    min-height: 38px;
+    padding: 9px 15px;
+    border: 1px solid #d7deeb;
+    border-radius: 999px;
+    background: #ffffffb8;
+    color: #35415a;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 3px 10px #1720330b;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.topbar-actions .secondary-button:hover {
+    transform: translateY(-1px);
+    border-color: #bcc9e5;
+    background: #ffffff;
+}
+
+body.dark-mode .topbar {
+    border-color: #2b3950;
+    background: linear-gradient(135deg, #192944 0%, #151f32 58%, #1b2941 100%);
+    box-shadow: 0 18px 40px #00000024;
+}
+
+body.dark-mode .topbar-brand {
+    background: transparent;
+}
+
+body.dark-mode .topbar-copy h1,
+body.dark-mode .topbar-copy .subtitle {
+    color: var(--text-main);
+}
+
+body.dark-mode .topbar-copy .eyebrow {
+    color: #a9baff;
+}
+
+body.dark-mode .topbar-actions .secondary-button {
+    border-color: #394a65;
+    background: #24344ecc;
+    color: #e6edf7;
+}
+
+body.dark-mode .topbar-actions .secondary-button:hover {
+    background: #304461;
+}
+
+@media (max-width: 700px) {
+    .main {
+        width: 100%;
+    }
+
+    .topbar {
+        min-height: 260px;
+        padding: 82px 18px 30px;
+    }
+
+    .topbar-copy h1 {
+        font-size: 28px;
+    }
+
+    .topbar-copy .subtitle {
+        font-size: 14px;
+    }
+
+    .topbar-actions {
+        top: 14px;
+        right: 14px;
+        width: auto;
+        justify-content: flex-end;
+        flex-wrap: nowrap;
+        gap: 7px;
+    }
+
+    .topbar-actions .secondary-button {
+        min-height: 36px;
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+}

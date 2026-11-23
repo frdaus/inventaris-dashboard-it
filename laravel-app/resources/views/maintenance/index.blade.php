@@ -28,7 +28,6 @@
     <main class="main">
         <header class="topbar">
             <div class="topbar-brand">
-                <div class="avatar" aria-hidden="true">IT</div>
                 <div class="topbar-copy">
                     <p class="eyebrow">ASSET MANAGEMENT</p>
                     <h1>Kelola Pemeliharaan</h1>
