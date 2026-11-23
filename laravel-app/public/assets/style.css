@@ -204,6 +204,46 @@ h3 {
     margin-top: 22px;
 }
 
+.asset-form-section {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--page-bg);
+}
+
+.asset-form-section-heading h2 {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.asset-form-section-heading p {
+    margin: 5px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.asset-form-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 13px 12px;
+}
+
+.asset-form-fields label {
+    min-width: 0;
+}
+
+.asset-form-field-wide {
+    grid-column: 1 / -1;
+}
+
+.asset-form-date-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .asset-form label {
     display: grid;
     gap: 7px;
@@ -263,6 +303,11 @@ select:focus {
 }
 
 @media (max-width: 700px) {
+    .asset-form-fields,
+    .asset-form-date-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .asset-form-actions {
         grid-template-columns: 1fr;
     }
