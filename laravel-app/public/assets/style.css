@@ -2315,3 +2315,87 @@ body.dark-mode .topbar-actions .secondary-button:hover {
         font-size: 11px;
     }
 }
+
+.activity-table {
+    min-width: 860px;
+}
+
+.activity-time {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.activity-kind {
+    display: block;
+    margin-top: 6px;
+    color: var(--text-muted);
+}
+
+.activity-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.activity-badge.action-create {
+    background: #e2f8ec;
+    color: #16764b;
+}
+
+.activity-badge.action-update {
+    background: #e9edff;
+    color: #354db0;
+}
+
+.activity-badge.action-delete {
+    background: #ffebeb;
+    color: #b83e49;
+}
+
+.activity-detail {
+    min-width: 280px;
+    max-width: 520px;
+    white-space: normal;
+    line-height: 1.55;
+}
+
+.activity-detail details summary {
+    color: #354db0;
+    cursor: pointer;
+    font-weight: 650;
+}
+
+.activity-detail details ul {
+    display: grid;
+    gap: 5px;
+    margin: 10px 0 0;
+    padding-left: 19px;
+}
+
+.activity-detail details li {
+    overflow-wrap: anywhere;
+}
+
+body.dark-mode .activity-badge.action-create {
+    background: #173d32;
+    color: #8ce0b7;
+}
+
+body.dark-mode .activity-badge.action-update {
+    background: #26365a;
+    color: #c3d0ff;
+}
+
+body.dark-mode .activity-badge.action-delete {
+    background: #49252d;
+    color: #ffb8c0;
+}
+
+body.dark-mode .activity-detail details summary {
+    color: #a9baff;
+}

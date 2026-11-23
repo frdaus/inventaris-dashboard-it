@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admin;
 use App\Models\Asset;
+use App\Models\AuditLog;
 use App\Services\LegacyPasswordVerifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -373,10 +374,12 @@ class InventoryController extends Controller
 
     private function writeAuditLog(string $action, Asset $asset, ?string $description): void
     {
-        DB::table('audit_logs')->insert([
+        AuditLog::query()->create([
             'admin_id' => Auth::id(),
             'username' => Auth::user()?->username ?? 'unknown',
             'action' => $action,
+            'entity_type' => 'asset',
+            'entity_id' => $asset->id,
             'asset_id' => $asset->id,
             'asset_code' => $asset->kode_aset,
             'asset_name' => $asset->nama_barang,

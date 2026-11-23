@@ -38,6 +38,9 @@ class InventoryTest extends TestCase
         $this->get(route('maintenance.index'))
             ->assertRedirect(route('login'));
 
+        $this->get(route('activity.index'))
+            ->assertRedirect(route('login'));
+
         $this->get(route('asset.label', 1))
             ->assertRedirect(route('login'));
     }
@@ -126,6 +129,12 @@ class InventoryTest extends TestCase
             'asset_name' => 'Laptop',
             'status' => 'Berlangsung',
         ]);
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'CREATE',
+            'entity_type' => 'maintenance',
+            'entity_id' => $record->id,
+            'asset_id' => $asset->id,
+        ]);
 
         $this->patch(route('maintenance.status', $record), [
             'status' => 'Selesai',
@@ -135,6 +144,18 @@ class InventoryTest extends TestCase
             'id' => $record->id,
             'status' => 'Selesai',
         ]);
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'UPDATE',
+            'entity_type' => 'maintenance',
+            'entity_id' => $record->id,
+            'description' => 'Status pemeliharaan diubah dari Berlangsung menjadi Selesai.',
+        ]);
+        $this->get(route('activity.index'))
+            ->assertOk()
+            ->assertSee('Riwayat Aktivitas')
+            ->assertSee('Mencatat pemeliharaan: Mengganti baterai')
+            ->assertSee('Status pemeliharaan diubah dari Berlangsung menjadi Selesai.')
+            ->assertSee('admin');
         $this->assertDatabaseHas('aset', [
             'id' => $asset->id,
             'kondisi' => 'Rusak',
@@ -378,6 +399,8 @@ class InventoryTest extends TestCase
         $asset = Asset::where('kode_aset', 'AST-002')->firstOrFail();
         $this->assertDatabaseHas('audit_logs', [
             'action' => 'CREATE',
+            'entity_type' => 'asset',
+            'entity_id' => $asset->id,
             'asset_id' => $asset->id,
         ]);
 
@@ -396,6 +419,8 @@ class InventoryTest extends TestCase
         ]);
         $this->assertDatabaseHas('audit_logs', [
             'action' => 'UPDATE',
+            'entity_type' => 'asset',
+            'entity_id' => $asset->id,
             'asset_id' => $asset->id,
         ]);
 
@@ -407,6 +432,11 @@ class InventoryTest extends TestCase
             'action' => 'DELETE',
             'asset_id' => $asset->id,
         ]);
+        $this->get(route('activity.index'))
+            ->assertOk()
+            ->assertSee('Riwayat Aktivitas')
+            ->assertSee('Managed Switch')
+            ->assertSee('Aset dihapus; data terakhirnya tersimpan dalam audit.');
     }
 
     #[Test]

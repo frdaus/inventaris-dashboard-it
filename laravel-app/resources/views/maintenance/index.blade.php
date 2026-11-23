@@ -19,6 +19,10 @@
             <span class="nav-icon" aria-hidden="true">🔧</span>
             <span class="nav-label">Kelola Pemeliharaan</span>
         </a>
+        <a class="nav" href="{{ route('activity.index') }}">
+            <span class="nav-icon" aria-hidden="true">◷</span>
+            <span class="nav-label">Riwayat Aktivitas</span>
+        </a>
         <div class="sidebar-note">
             <strong>Asset Management</strong>
             <p>Catat pekerjaan dan riwayat pemeliharaan aset.</p>

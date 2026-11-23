@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AssetLabelController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MaintenanceController;
@@ -23,6 +24,8 @@ Route::middleware('auth')->group(function () {
         ->name('asset.label');
     Route::get('/maintenance', [MaintenanceController::class, 'index'])
         ->name('maintenance.index');
+    Route::get('/activity', [ActivityController::class, 'index'])
+        ->name('activity.index');
     Route::post('/maintenance', [MaintenanceController::class, 'store'])
         ->name('maintenance.store');
     Route::patch('/maintenance/{record}/status', [MaintenanceController::class, 'updateStatus'])
