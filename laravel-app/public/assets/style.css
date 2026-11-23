@@ -498,23 +498,68 @@ body {
 .nav {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 9px;
     margin-top: 8px;
-    padding: 13px 14px;
+    min-width: 0;
+    min-height: 48px;
+    padding: 10px 11px;
+    border: 1px solid #ffffff0d;
+    border-radius: 12px;
+    background: #ffffff08;
     color: #c5cfe5;
-    border: 1px solid transparent;
-    transition: background 0.2s ease, color 0.2s ease;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease,
+                box-shadow 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .nav:hover {
+    transform: translateX(2px);
+    border-color: #52658c;
     background: #243557;
     color: white;
 }
 
+.nav-icon {
+    display: grid;
+    place-items: center;
+    width: 23px;
+    height: 23px;
+    flex: 0 0 23px;
+    border-radius: 7px;
+    background: #ffffff0c;
+    color: #aebfe8;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.nav-label {
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.nav:hover .nav-icon {
+    background: #ffffff18;
+    color: #ffffff;
+}
+
 .nav.active {
     background: linear-gradient(120deg, #405bc8, #3448a5);
+    border-color: #6075d6;
     color: white;
-    box-shadow: 0 5px 16px #080f2450;
+    box-shadow: 0 6px 16px #080f2450;
+}
+
+.nav.active .nav-icon {
+    background: #ffffff20;
+    color: #ffffff;
+}
+
+.nav:focus-visible {
+    outline: 3px solid #91a7ff;
+    outline-offset: 3px;
 }
 
 .sidebar-note {

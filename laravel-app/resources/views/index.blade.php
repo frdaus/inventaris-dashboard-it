@@ -12,8 +12,14 @@
     <aside class="sidebar">
         <div class="brand"><span>IT Inventaris</span></div>
         <p class="menu-label">MENU UTAMA</p>
-        <a class="nav active" href="{{ route('dashboard') }}">▦ Dashboard</a>
-        <a class="nav" href="{{ route('maintenance.index') }}">🔧 Kelola Pemeliharaan</a>
+        <a class="nav active" href="{{ route('dashboard') }}" aria-current="page">
+            <span class="nav-icon" aria-hidden="true">▦</span>
+            <span class="nav-label">Dashboard</span>
+        </a>
+        <a class="nav" href="{{ route('maintenance.index') }}">
+            <span class="nav-icon" aria-hidden="true">🔧</span>
+            <span class="nav-label">Kelola Pemeliharaan</span>
+        </a>
         <div class="sidebar-note">
             <strong>Asset Management</strong>
             <p>Monitoring inventaris IT dalam satu dashboard.</p>
