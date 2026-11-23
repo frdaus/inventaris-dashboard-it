@@ -437,6 +437,10 @@ class InventoryTest extends TestCase
             ->assertSee('Riwayat Aktivitas')
             ->assertSee('Managed Switch')
             ->assertSee('Aset dihapus; data terakhirnya tersimpan dalam audit.');
+        $this->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Aktivitas Terbaru')
+            ->assertSee('Managed Switch');
     }
 
     #[Test]

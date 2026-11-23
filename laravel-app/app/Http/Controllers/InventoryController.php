@@ -79,6 +79,19 @@ class InventoryController extends Controller
         }
 
         $stats = $this->inventoryStats();
+        $recentActivities = AuditLog::query()
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->limit(5)
+            ->get([
+                'id',
+                'username',
+                'action',
+                'entity_type',
+                'asset_code',
+                'asset_name',
+                'created_at',
+            ]);
 
         $categoryData = DB::table('aset')
             ->select('kategori')
@@ -124,6 +137,7 @@ class InventoryController extends Controller
 
         return view('index', [
             'stats' => $stats,
+            'recent_activities' => $recentActivities,
             'assets' => $assets,
             'category_data' => $categoryData,
             'categories' => $categories,

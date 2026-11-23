@@ -138,17 +138,67 @@
         </section>
 
         <section class="content-grid">
-            <article class="panel chart-panel">
-                <div class="panel-heading">
-                    <div>
-                        <h3>Aset per Kategori</h3>
-                        <p>Jumlah unit berdasarkan kategori</p>
+            <div class="dashboard-left-column">
+                <article class="panel chart-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>Aset per Kategori</h3>
+                            <p>Jumlah unit berdasarkan kategori</p>
+                        </div>
                     </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="categoryChart"></canvas>
-                </div>
-            </article>
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </article>
+
+                <section class="panel activity-summary-panel" aria-label="Aktivitas terbaru">
+                    <div class="activity-summary-heading">
+                        <div>
+                            <h3>Aktivitas Terbaru</h3>
+                            <p>Perubahan inventaris dan pemeliharaan</p>
+                        </div>
+                        <a href="{{ route('activity.index') }}" class="activity-summary-link">
+                            Lihat semua
+                        </a>
+                    </div>
+
+                    <ul class="activity-summary-list">
+                        @forelse ($recent_activities as $activity)
+                            <li>
+                                <span class="activity-summary-marker action-{{ strtolower($activity->action) }}"
+                                      aria-hidden="true"></span>
+                                <div class="activity-summary-copy">
+                                    <div class="activity-summary-title">
+                                        <strong>
+                                            {{ match ($activity->action) {
+                                                'CREATE' => 'Ditambahkan',
+                                                'UPDATE' => 'Diperbarui',
+                                                'DELETE' => 'Dihapus',
+                                                default => $activity->action,
+                                            } }}
+                                        </strong>
+                                        <span>{{ $activity->entity_type === 'maintenance' ? 'Pemeliharaan' : 'Aset' }}</span>
+                                    </div>
+                                    <p>
+                                        {{ $activity->asset_code ?: 'Tanpa kode aset' }}
+                                        @if ($activity->asset_name)
+                                            · {{ $activity->asset_name }}
+                                        @endif
+                                    </p>
+                                    <small>
+                                        {{ $activity->created_at?->format('d/m/Y H:i') ?? '—' }}
+                                        · {{ $activity->username }}
+                                    </small>
+                                </div>
+                            </li>
+                        @empty
+                            <li class="activity-summary-empty">
+                                Belum ada aktivitas. Perubahan aset dan pemeliharaan akan muncul di sini.
+                            </li>
+                        @endforelse
+                    </ul>
+                </section>
+            </div>
 
             <article class="panel form-panel">
                 <div class="panel-heading">
