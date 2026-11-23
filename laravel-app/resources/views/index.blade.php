@@ -20,10 +20,16 @@
             <span class="nav-icon" aria-hidden="true">🔧</span>
             <span class="nav-label">Kelola Pemeliharaan</span>
         </a>
-        <a class="nav" href="{{ route('activity.index') }}">
-            <span class="nav-icon" aria-hidden="true">◷</span>
-            <span class="nav-label">Riwayat Aktivitas</span>
-        </a>
+        @if (auth()->user()->role === \App\Models\Admin::ROLE_ADMIN)
+            <a class="nav" href="{{ route('activity.index') }}">
+                <span class="nav-icon" aria-hidden="true">◷</span>
+                <span class="nav-label">Riwayat Aktivitas</span>
+            </a>
+            <a class="nav" href="{{ route('users.index') }}">
+                <span class="nav-icon" aria-hidden="true">♙</span>
+                <span class="nav-label">Pengguna &amp; Akses</span>
+            </a>
+        @endif
         <div class="sidebar-note">
             <strong>Asset Management</strong>
             <p>Monitoring inventaris IT dalam satu dashboard.</p>
@@ -137,7 +143,7 @@
             </div>
         </section>
 
-        <section class="content-grid">
+        <section class="content-grid {{ auth()->user()->role === \App\Models\Admin::ROLE_GUEST ? 'read-only-dashboard' : '' }}">
             <div class="dashboard-left-column">
                 <article class="panel chart-panel">
                     <div class="panel-heading">
@@ -151,56 +157,67 @@
                     </div>
                 </article>
 
-                <section class="panel activity-summary-panel" aria-label="Aktivitas terbaru">
-                    <div class="activity-summary-heading">
-                        <div>
-                            <h3>Aktivitas Terbaru</h3>
-                            <p>Perubahan inventaris dan pemeliharaan</p>
+                @if (auth()->user()->role === \App\Models\Admin::ROLE_ADMIN)
+                    <section class="panel activity-summary-panel" aria-label="Aktivitas terbaru">
+                        <div class="activity-summary-heading">
+                            <div>
+                                <h3>Aktivitas Terbaru</h3>
+                                <p>Perubahan inventaris dan pemeliharaan</p>
+                            </div>
+                            <a href="{{ route('activity.index') }}" class="activity-summary-link">
+                                Lihat semua
+                            </a>
                         </div>
-                        <a href="{{ route('activity.index') }}" class="activity-summary-link">
-                            Lihat semua
-                        </a>
-                    </div>
 
-                    <ul class="activity-summary-list">
-                        @forelse ($recent_activities as $activity)
-                            <li>
-                                <span class="activity-summary-marker action-{{ strtolower($activity->action) }}"
-                                      aria-hidden="true"></span>
-                                <div class="activity-summary-copy">
-                                    <div class="activity-summary-title">
-                                        <strong>
-                                            {{ match ($activity->action) {
-                                                'CREATE' => 'Ditambahkan',
-                                                'UPDATE' => 'Diperbarui',
-                                                'DELETE' => 'Dihapus',
-                                                default => $activity->action,
-                                            } }}
-                                        </strong>
-                                        <span>{{ $activity->entity_type === 'maintenance' ? 'Pemeliharaan' : 'Aset' }}</span>
+                        <ul class="activity-summary-list">
+                            @forelse ($recent_activities as $activity)
+                                <li>
+                                    <span class="activity-summary-marker action-{{ strtolower($activity->action) }}"
+                                          aria-hidden="true"></span>
+                                    <div class="activity-summary-copy">
+                                        <div class="activity-summary-title">
+                                            <strong>
+                                                {{ match ($activity->action) {
+                                                    'CREATE' => 'Ditambahkan',
+                                                    'UPDATE' => 'Diperbarui',
+                                                    'DELETE' => 'Dihapus',
+                                                    default => $activity->action,
+                                                } }}
+                                            </strong>
+                                            <span>{{ match ($activity->entity_type) {
+                                                'maintenance' => 'Pemeliharaan',
+                                                'user' => 'Pengguna',
+                                                default => 'Aset',
+                                            } }}</span>
+                                        </div>
+                                        <p>
+                                            @if ($activity->entity_type === 'user')
+                                                Akun: {{ $activity->asset_name }}
+                                            @else
+                                                {{ $activity->asset_code ?: 'Tanpa kode aset' }}
+                                                @if ($activity->asset_name)
+                                                    · {{ $activity->asset_name }}
+                                                @endif
+                                            @endif
+                                        </p>
+                                        <small>
+                                            {{ $activity->created_at?->format('d/m/Y H:i') ?? '—' }}
+                                            · {{ $activity->username }}
+                                        </small>
                                     </div>
-                                    <p>
-                                        {{ $activity->asset_code ?: 'Tanpa kode aset' }}
-                                        @if ($activity->asset_name)
-                                            · {{ $activity->asset_name }}
-                                        @endif
-                                    </p>
-                                    <small>
-                                        {{ $activity->created_at?->format('d/m/Y H:i') ?? '—' }}
-                                        · {{ $activity->username }}
-                                    </small>
-                                </div>
-                            </li>
-                        @empty
-                            <li class="activity-summary-empty">
-                                Belum ada aktivitas. Perubahan aset dan pemeliharaan akan muncul di sini.
-                            </li>
-                        @endforelse
-                    </ul>
-                </section>
+                                </li>
+                            @empty
+                                <li class="activity-summary-empty">
+                                    Belum ada aktivitas. Perubahan aset dan pemeliharaan akan muncul di sini.
+                                </li>
+                            @endforelse
+                        </ul>
+                    </section>
+                @endif
             </div>
 
-            <article class="panel form-panel">
+            @if (auth()->user()->role !== \App\Models\Admin::ROLE_GUEST)
+                <article class="panel form-panel">
                 <div class="panel-heading">
                     <div>
                         <h3>Tambah Aset</h3>
@@ -305,7 +322,8 @@
                         + Simpan Aset
                     </button>
                 </form>
-            </article>
+                </article>
+            @endif
         </section>
 
         <section class="panel table-panel">
@@ -364,15 +382,17 @@
                         <button type="submit" class="secondary-button filter-button">
                             Cari / Filter
                         </button>
-                        <a class="secondary-button export-button"
-                           href="{{ route('export_excel', [
-                               'q' => $search,
-                               'kategori' => $kategori_filter,
-                               'kondisi' => $kondisi_filter,
-                               'tracking_mode' => $tracking_mode_filter,
-                           ]) }}">
-                            <span aria-hidden="true">📥</span> Export Excel
-                        </a>
+                        @if (auth()->user()->role !== \App\Models\Admin::ROLE_GUEST)
+                            <a class="secondary-button export-button"
+                               href="{{ route('export_excel', [
+                                   'q' => $search,
+                                   'kategori' => $kategori_filter,
+                                   'kondisi' => $kondisi_filter,
+                                   'tracking_mode' => $tracking_mode_filter,
+                               ]) }}">
+                                <span aria-hidden="true">📥</span> Export Excel
+                            </a>
+                        @endif
                     </div>
                     @if ($search || $kategori_filter || $kondisi_filter || $tracking_mode_filter)
                         <a class="clear-link" href="{{ route('dashboard') }}">Reset</a>
@@ -396,7 +416,9 @@
                             <th>Pemegang / Departemen</th>
                             <th>Garansi Sampai</th>
                             <th>Tanggal Masuk</th>
-                            <th>Aksi</th>
+                            @if (auth()->user()->role !== \App\Models\Admin::ROLE_GUEST)
+                                <th>Aksi</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -425,25 +447,30 @@
                                 </td>
                                 <td>{{ $asset->garansi_sampai?->format('Y-m-d') ?? '-' }}</td>
                                 <td>{{ $asset->tanggal_masuk?->format('Y-m-d') ?? '-' }}</td>
-                                <td>
-                                    <div style="display:flex; gap:6px;">
-                                        <a href="{{ route('asset.label', $asset->id) }}"
-                                           class="label-button" target="_blank" rel="noopener"
-                                           aria-label="Cetak label {{ $asset->kode_aset }}">Label</a>
-                                        <a href="{{ route('edit_aset', $asset->id) }}"
-                                           class="edit-button">Edit</a>
-                                        <form method="POST"
-                                              action="{{ route('hapus_aset', $asset->id) }}"
-                                              onsubmit="return confirm('Yakin ingin menghapus aset ini?')">
-                                            @csrf
-                                            <button type="submit" class="delete-button">Hapus</button>
-                                        </form>
-                                    </div>
-                                </td>
+                                @if (auth()->user()->role !== \App\Models\Admin::ROLE_GUEST)
+                                    <td>
+                                        <div style="display:flex; gap:6px;">
+                                            <a href="{{ route('asset.label', $asset->id) }}"
+                                               class="label-button" target="_blank" rel="noopener"
+                                               aria-label="Cetak label {{ $asset->kode_aset }}">Label</a>
+                                            <a href="{{ route('edit_aset', $asset->id) }}"
+                                               class="edit-button">Edit</a>
+                                            @if (auth()->user()->role === \App\Models\Admin::ROLE_ADMIN)
+                                                <form method="POST"
+                                                      action="{{ route('hapus_aset', $asset->id) }}"
+                                                      onsubmit="return confirm('Yakin ingin menghapus aset ini?')">
+                                                    @csrf
+                                                    <button type="submit" class="delete-button">Hapus</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                @endif
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="13" class="empty-state">
+                                <td colspan="{{ auth()->user()->role === \App\Models\Admin::ROLE_GUEST ? 12 : 13 }}"
+                                    class="empty-state">
                                     @if ($search || $kategori_filter || $kondisi_filter || $tracking_mode_filter)
                                         Tidak ada aset yang cocok dengan pencarian.
                                     @else

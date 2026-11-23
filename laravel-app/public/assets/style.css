@@ -2546,3 +2546,129 @@ body.dark-mode .activity-summary-marker.action-delete {
         padding: 18px;
     }
 }
+
+.read-only-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.user-create-panel {
+    margin-bottom: 22px;
+}
+
+.user-create-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+}
+
+.user-create-form .primary-button {
+    align-self: end;
+}
+
+.user-table {
+    min-width: 900px;
+}
+
+.user-actions-cell {
+    min-width: 330px;
+}
+
+.user-access-form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.user-access-form select {
+    width: auto;
+    min-width: 115px;
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: 12px;
+}
+
+.user-access-form .secondary-button,
+.user-password-form .secondary-button {
+    min-height: 38px;
+    padding: 9px 12px;
+}
+
+.user-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.user-status.is-active {
+    background: #e2f8ec;
+    color: #16764b;
+}
+
+.user-status.is-inactive {
+    background: #ffebeb;
+    color: #b83e49;
+}
+
+.protected-user-note {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.user-password-reset {
+    margin-top: 9px;
+}
+
+.user-password-reset summary {
+    color: #354db0;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.user-password-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.user-password-form label {
+    display: grid;
+    gap: 6px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.user-password-form input {
+    min-height: 38px;
+}
+
+body.dark-mode .user-status.is-active {
+    background: #173d32;
+    color: #8ce0b7;
+}
+
+body.dark-mode .user-status.is-inactive {
+    background: #49252d;
+    color: #ffb8c0;
+}
+
+body.dark-mode .user-password-reset summary {
+    color: #a9baff;
+}
+
+@media (max-width: 700px) {
+    .user-create-form,
+    .user-password-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .user-create-form .primary-button {
+        width: 100%;
+    }
+}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin | IT Inventory</title>
+    <title>Login | IT Inventory</title>
     <link rel="stylesheet" href="{{ asset('assets/login.css') }}">
 </head>
 <body>
@@ -18,10 +18,10 @@
                 </svg>
             </div>
 
-            <p class="eyebrow">ADMINISTRATOR PORTAL</p>
+            <p class="eyebrow">USER PORTAL</p>
             <h1>Selamat Datang</h1>
             <p class="subtitle">
-                Login untuk mengelola inventaris aset IT Anda.
+                Masuk untuk mengakses inventaris IT sesuai peran Anda.
             </p>
 
             @if ($errors->any())
@@ -87,7 +87,7 @@
 
             <div class="security-note">
                 <span aria-hidden="true">●</span>
-                Akses terbatas untuk administrator
+                Akses hanya untuk pengguna terdaftar
             </div>
         </section>
 

@@ -96,6 +96,7 @@ class ActivityController extends Controller
         });
         $activity->setAttribute('entity_label', match ($activity->entity_type) {
             'maintenance' => 'Pemeliharaan',
+            'user' => 'Pengguna',
             default => 'Aset',
         });
 

@@ -37,7 +37,8 @@ class InventoryController extends Controller
         ]);
         $admin = Admin::where('username', trim($credentials['username']))->first();
 
-        if (! $admin || ! $legacyPasswords->verify($credentials['password'], $admin->password_hash)) {
+        if (! $admin || ! $admin->is_active
+            || ! $legacyPasswords->verify($credentials['password'], $admin->password_hash)) {
             return back()
                 ->withErrors(['login' => 'Username atau password salah.'])
                 ->onlyInput('username');
@@ -79,19 +80,21 @@ class InventoryController extends Controller
         }
 
         $stats = $this->inventoryStats();
-        $recentActivities = AuditLog::query()
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->limit(5)
-            ->get([
-                'id',
-                'username',
-                'action',
-                'entity_type',
-                'asset_code',
-                'asset_name',
-                'created_at',
-            ]);
+        $recentActivities = Auth::user()?->role === Admin::ROLE_ADMIN
+            ? AuditLog::query()
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->limit(5)
+                ->get([
+                    'id',
+                    'username',
+                    'action',
+                    'entity_type',
+                    'asset_code',
+                    'asset_name',
+                    'created_at',
+                ])
+            : collect();
 
         $categoryData = DB::table('aset')
             ->select('kategori')

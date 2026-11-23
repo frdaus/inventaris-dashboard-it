@@ -19,10 +19,16 @@
             <span class="nav-icon" aria-hidden="true">🔧</span>
             <span class="nav-label">Kelola Pemeliharaan</span>
         </a>
-        <a class="nav" href="{{ route('activity.index') }}">
-            <span class="nav-icon" aria-hidden="true">◷</span>
-            <span class="nav-label">Riwayat Aktivitas</span>
-        </a>
+        @if (auth()->user()->role === \App\Models\Admin::ROLE_ADMIN)
+            <a class="nav" href="{{ route('activity.index') }}">
+                <span class="nav-icon" aria-hidden="true">◷</span>
+                <span class="nav-label">Riwayat Aktivitas</span>
+            </a>
+            <a class="nav" href="{{ route('users.index') }}">
+                <span class="nav-icon" aria-hidden="true">♙</span>
+                <span class="nav-label">Pengguna &amp; Akses</span>
+            </a>
+        @endif
         <div class="sidebar-note">
             <strong>Asset Management</strong>
             <p>Catat pekerjaan dan riwayat pemeliharaan aset.</p>
@@ -58,7 +64,8 @@
             <div class="notice error">{{ $errors->first() }}</div>
         @endif
 
-        <section class="panel maintenance-form-panel">
+        @if (auth()->user()->role !== \App\Models\Admin::ROLE_GUEST)
+            <section class="panel maintenance-form-panel">
             <div class="panel-heading">
                 <div>
                     <h3>Catat Pemeliharaan</h3>
@@ -118,7 +125,8 @@
                 </div>
                 <button class="primary-button" type="submit">+ Simpan Riwayat</button>
             </form>
-        </section>
+            </section>
+        @endif
 
         <section class="panel maintenance-history-panel">
             <div class="maintenance-history-heading">
@@ -138,7 +146,9 @@
                             <th>Teknisi / Vendor</th>
                             <th>Biaya</th>
                             <th>Status</th>
-                            <th>Perbarui Status</th>
+                            @if (auth()->user()->role !== \App\Models\Admin::ROLE_GUEST)
+                                <th>Perbarui Status</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -166,26 +176,30 @@
                                         {{ $record->status }}
                                     </span>
                                 </td>
-                                <td>
-                                    <form class="maintenance-status-form" method="POST"
-                                          action="{{ route('maintenance.status', $record) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <select name="status" aria-label="Status untuk {{ $record->asset_code }}">
-                                            @foreach (\App\Models\MaintenanceRecord::STATUSES as $status)
-                                                <option value="{{ $status }}"
-                                                    @selected($record->status === $status)>
-                                                    {{ $status }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <button type="submit" class="secondary-button">Simpan</button>
-                                    </form>
-                                </td>
+                                @if (auth()->user()->role !== \App\Models\Admin::ROLE_GUEST)
+                                    <td>
+                                        <form class="maintenance-status-form" method="POST"
+                                              action="{{ route('maintenance.status', $record) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <select name="status"
+                                                    aria-label="Status untuk {{ $record->asset_code }}">
+                                                @foreach (\App\Models\MaintenanceRecord::STATUSES as $status)
+                                                    <option value="{{ $status }}"
+                                                        @selected($record->status === $status)>
+                                                        {{ $status }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit" class="secondary-button">Simpan</button>
+                                        </form>
+                                    </td>
+                                @endif
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="empty-state">
+                                <td colspan="{{ auth()->user()->role === \App\Models\Admin::ROLE_GUEST ? 6 : 7 }}"
+                                    class="empty-state">
                                     Belum ada riwayat pemeliharaan. Catat pekerjaan pertama melalui formulir di atas.
                                 </td>
                             </tr>

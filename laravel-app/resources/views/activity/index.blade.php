@@ -23,6 +23,10 @@
             <span class="nav-icon" aria-hidden="true">◷</span>
             <span class="nav-label">Riwayat Aktivitas</span>
         </a>
+        <a class="nav" href="{{ route('users.index') }}">
+            <span class="nav-icon" aria-hidden="true">♙</span>
+            <span class="nav-label">Pengguna &amp; Akses</span>
+        </a>
         <div class="sidebar-note">
             <strong>Audit Aktivitas</strong>
             <p>Catatan perubahan aset dan pemeliharaan.</p>
@@ -66,7 +70,7 @@
                             <th>Waktu</th>
                             <th>Pengguna</th>
                             <th>Aktivitas</th>
-                            <th>Aset</th>
+                            <th>Objek</th>
                             <th>Rincian</th>
                         </tr>
                     </thead>
@@ -84,9 +88,13 @@
                                     <small class="activity-kind">{{ $activity->entity_label }}</small>
                                 </td>
                                 <td>
-                                    <strong>{{ $activity->asset_code ?: '—' }}</strong>
-                                    @if ($activity->asset_name)
-                                        <br><small>{{ $activity->asset_name }}</small>
+                                    @if ($activity->entity_type === 'user')
+                                        <strong>{{ $activity->asset_name ?: '—' }}</strong>
+                                    @else
+                                        <strong>{{ $activity->asset_code ?: '—' }}</strong>
+                                        @if ($activity->asset_name)
+                                            <br><small>{{ $activity->asset_name }}</small>
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="activity-detail">
