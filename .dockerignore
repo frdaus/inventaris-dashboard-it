@@ -5,3 +5,12 @@ __pycache__/
 .git/
 .env
 *.backup
+*.backup-*
+*.bak
+*.before-*
+*.sebelum-*
+*.sql
+backups/
+/Backup 2/
+laravel-app/.env
+laravel-app/vendor/

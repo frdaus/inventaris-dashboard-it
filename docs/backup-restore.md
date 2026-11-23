@@ -22,7 +22,7 @@ Tujuannya adalah:
 | Service Docker Compose | `mysql`                           |
 | Folder backup          | `~/inventaris-dashboard/backups/` |
 | Folder dokumentasi     | `~/inventaris-dashboard/docs/`    |
-| Aplikasi web           | `http://localhost:5000`           |
+| Aplikasi web           | `http://localhost:5000` (Laravel) |
 | Database engine        | MySQL 8.4                         |
 | Lingkungan             | Ubuntu/WSL dan Docker Compose     |
 
