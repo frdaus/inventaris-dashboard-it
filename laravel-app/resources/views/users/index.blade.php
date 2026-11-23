@@ -43,6 +43,7 @@
                 </div>
             </div>
             <div class="topbar-actions">
+                @include('partials.profile-link')
                 <button type="button" id="theme-toggle"
                         class="secondary-button" aria-pressed="false">
                     🌙 Mode Gelap

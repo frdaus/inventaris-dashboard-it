@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AssetLabelController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +42,14 @@ Route::middleware(['auth', 'active'])->group(function () {
         ->name('maintenance.status');
     Route::post('/logout', [InventoryController::class, 'logout'])
         ->name('logout');
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+    Route::get('/profile/photo', [ProfileController::class, 'photo'])
+        ->name('profile.photo');
+    Route::put('/profile/photo', [ProfileController::class, 'updatePhoto'])
+        ->name('profile.photo.update');
+    Route::delete('/profile/photo', [ProfileController::class, 'deletePhoto'])
+        ->name('profile.photo.destroy');
     Route::get('/users', [UserController::class, 'index'])
         ->middleware('role:admin')
         ->name('users.index');

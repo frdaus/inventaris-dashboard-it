@@ -33,6 +33,7 @@ class Admin extends Authenticatable
 
     protected $hidden = [
         'password_hash',
+        'profile_photo_path',
     ];
 
     public $timestamps = false;
