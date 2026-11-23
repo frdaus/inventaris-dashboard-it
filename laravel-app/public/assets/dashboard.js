@@ -1,6 +1,9 @@
 const canvas = document.getElementById("categoryChart");
 const themeToggle = document.getElementById("theme-toggle");
 const themeStorageKey = "inventaris-dashboard-theme";
+const statsContainer = document.querySelector("[data-stats-url]");
+const statsLiveStatus = document.getElementById("stats-live-status");
+const statsLiveCopy = statsLiveStatus?.querySelector(".stats-live-copy");
 
 function applyTheme(theme) {
     const isDark = theme === "dark";
@@ -109,6 +112,64 @@ if (canvas && typeof Chart !== "undefined") {
                     }
                 }
             }
+        }
+    });
+}
+
+if (statsContainer && statsLiveStatus && statsLiveCopy) {
+    let statsRequestInFlight = false;
+
+    async function refreshStats() {
+        if (document.hidden || statsRequestInFlight) {
+            return;
+        }
+
+        statsRequestInFlight = true;
+
+        try {
+            const response = await fetch(statsContainer.dataset.statsUrl, {
+                headers: { Accept: "application/json" },
+                cache: "no-store"
+            });
+
+            if (!response.ok) {
+                throw new Error(`Permintaan statistik gagal (${response.status}).`);
+            }
+
+            const stats = await response.json();
+
+            statsContainer.querySelectorAll("[data-stat-value]").forEach(element => {
+                const value = Number(stats[element.dataset.statValue]);
+
+                if (!Number.isFinite(value)) {
+                    throw new Error(`Nilai statistik ${element.dataset.statValue} tidak valid.`);
+                }
+
+                element.textContent = new Intl.NumberFormat("id-ID").format(value);
+            });
+
+            statsLiveStatus.classList.remove("is-error");
+            statsLiveCopy.textContent =
+                `Diperbarui ${new Intl.DateTimeFormat("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                }).format(new Date())} · pembaruan tiap 30 detik`;
+        } catch (error) {
+            statsLiveStatus.classList.add("is-error");
+            statsLiveCopy.textContent =
+                "Pembaruan gagal; akan dicoba lagi dalam 30 detik.";
+            console.error("Statistik dashboard tidak dapat diperbarui.", error);
+        } finally {
+            statsRequestInFlight = false;
+        }
+    }
+
+    refreshStats();
+    window.setInterval(refreshStats, 30_000);
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) {
+            refreshStats();
         }
     });
 }

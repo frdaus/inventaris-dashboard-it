@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT Inventory Dashboard</title>
-    <link rel="stylesheet" href="{{ asset('assets/style.css') }}">
+    <link rel="stylesheet"
+          href="{{ asset('assets/style.css') }}?v={{ filemtime(public_path('assets/style.css')) }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -51,31 +52,79 @@
             <div class="notice error">{{ $errors->first() }}</div>
         @endif
 
-        <section class="stats">
-            <article class="stat-card">
-                <div class="stat-icon purple">▣</div>
-                <p>Total Unit Aset</p>
-                <h2>{{ $stats->total_unit }}</h2>
-                <small>{{ $stats->total_jenis }} jenis aset terdaftar</small>
-            </article>
-            <article class="stat-card">
-                <div class="stat-icon green">✓</div>
-                <p>Kondisi Baik</p>
-                <h2>{{ $stats->unit_baik }}</h2>
-                <small>Unit dalam kondisi baik</small>
-            </article>
-            <article class="stat-card">
-                <div class="stat-icon red">!</div>
-                <p>Kondisi Rusak</p>
-                <h2>{{ $stats->unit_rusak }}</h2>
-                <small>Unit membutuhkan tindak lanjut</small>
-            </article>
-            <article class="stat-card">
-                <div class="stat-icon orange">⚙</div>
-                <p>Maintenance</p>
-                <h2>{{ $stats->unit_maintenance }}</h2>
-                <small>Unit dalam pemeliharaan</small>
-            </article>
+        <section class="stats-section" aria-label="Ringkasan inventaris">
+            <p class="stats-live-status" id="stats-live-status" role="status" aria-live="polite">
+                <span class="live-indicator" aria-hidden="true"></span>
+                <span class="stats-live-copy">Memperbarui otomatis tiap 30 detik</span>
+            </p>
+            <div class="stats" data-stats-url="{{ route('dashboard.statistics') }}">
+                <article class="stat-card stat-total">
+                    <div class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="3" y="4" width="18" height="13" rx="2"></rect>
+                            <path d="M8 21h8m-4-4v4"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-copy">
+                        <p>Total Aset</p>
+                        <h2 data-stat-value="total_unit">{{ $stats->total_unit }}</h2>
+                        <small><span data-stat-value="total_jenis">{{ $stats->total_jenis }}</span> jenis aset terdaftar</small>
+                    </div>
+                    <svg class="stat-sparkline" viewBox="0 0 160 54" preserveAspectRatio="none" aria-hidden="true">
+                        <path class="spark-area" d="M0 49 C18 45 21 50 38 41 S60 46 78 31 S101 38 116 25 S139 28 160 4 L160 54 L0 54 Z"></path>
+                        <path class="spark-line" d="M0 49 C18 45 21 50 38 41 S60 46 78 31 S101 38 116 25 S139 28 160 4"></path>
+                    </svg>
+                </article>
+                <article class="stat-card stat-active">
+                    <div class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="m5 12 4 4L19 6"></path>
+                            <circle cx="12" cy="12" r="10"></circle>
+                        </svg>
+                    </div>
+                    <div class="stat-copy">
+                        <p>Aset Aktif</p>
+                        <h2 data-stat-value="unit_baik">{{ $stats->unit_baik }}</h2>
+                        <small>Unit kondisi baik</small>
+                    </div>
+                    <svg class="stat-sparkline" viewBox="0 0 160 54" preserveAspectRatio="none" aria-hidden="true">
+                        <path class="spark-area" d="M0 50 C18 47 26 48 40 39 S61 44 77 30 S97 34 114 23 S139 27 160 5 L160 54 L0 54 Z"></path>
+                        <path class="spark-line" d="M0 50 C18 47 26 48 40 39 S61 44 77 30 S97 34 114 23 S139 27 160 5"></path>
+                    </svg>
+                </article>
+                <article class="stat-card stat-repair">
+                    <div class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3 18a2.1 2.1 0 0 0 3 3l5.3-5.3a5 5 0 0 0 6.4-6.4L14 13l-3-3 3.7-3.7Z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-copy">
+                        <p>Dalam Perbaikan</p>
+                        <h2 data-stat-value="unit_maintenance">{{ $stats->unit_maintenance }}</h2>
+                        <small>Unit dalam pemeliharaan</small>
+                    </div>
+                    <svg class="stat-sparkline" viewBox="0 0 160 54" preserveAspectRatio="none" aria-hidden="true">
+                        <path class="spark-area" d="M0 50 C20 47 23 49 40 39 S59 43 77 31 S98 36 114 24 S140 27 160 6 L160 54 L0 54 Z"></path>
+                        <path class="spark-line" d="M0 50 C20 47 23 49 40 39 S59 43 77 31 S98 36 114 24 S140 27 160 6"></path>
+                    </svg>
+                </article>
+                <article class="stat-card stat-inactive">
+                    <div class="stat-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-copy">
+                        <p>Tidak Aktif</p>
+                        <h2 data-stat-value="unit_rusak">{{ $stats->unit_rusak }}</h2>
+                        <small>Unit kondisi rusak</small>
+                    </div>
+                    <svg class="stat-sparkline" viewBox="0 0 160 54" preserveAspectRatio="none" aria-hidden="true">
+                        <path class="spark-area" d="M0 50 C18 48 25 46 39 40 S61 44 77 31 S98 35 115 24 S139 28 160 5 L160 54 L0 54 Z"></path>
+                        <path class="spark-line" d="M0 50 C18 48 25 46 39 40 S61 44 77 31 S98 35 115 24 S139 28 160 5"></path>
+                    </svg>
+                </article>
+            </div>
         </section>
 
         <section class="content-grid">
@@ -251,18 +300,20 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit" class="secondary-button">
-                        Cari / Filter
-                    </button>
-                    <a class="secondary-button export-button"
-                       href="{{ route('export_excel', [
-                           'q' => $search,
-                           'kategori' => $kategori_filter,
-                           'kondisi' => $kondisi_filter,
-                           'tracking_mode' => $tracking_mode_filter,
-                       ]) }}">
-                        <span aria-hidden="true">📥</span> Export Excel
-                    </a>
+                    <div class="filter-actions">
+                        <button type="submit" class="secondary-button filter-button">
+                            Cari / Filter
+                        </button>
+                        <a class="secondary-button export-button"
+                           href="{{ route('export_excel', [
+                               'q' => $search,
+                               'kategori' => $kategori_filter,
+                               'kondisi' => $kondisi_filter,
+                               'tracking_mode' => $tracking_mode_filter,
+                           ]) }}">
+                            <span aria-hidden="true">📥</span> Export Excel
+                        </a>
+                    </div>
                     @if ($search || $kategori_filter || $kondisi_filter || $tracking_mode_filter)
                         <a class="clear-link" href="{{ route('dashboard') }}">Reset</a>
                     @endif
@@ -371,6 +422,6 @@
     <script>
         const categoryData = @json($category_data);
     </script>
-    <script src="{{ asset('assets/dashboard.js') }}"></script>
+    <script src="{{ asset('assets/dashboard.js') }}?v={{ filemtime(public_path('assets/dashboard.js')) }}"></script>
 </body>
 </html>

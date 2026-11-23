@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Admin;
 use App\Models\Asset;
 use App\Services\LegacyPasswordVerifier;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -76,13 +77,7 @@ class InventoryController extends Controller
             $trackingModeFilter = '';
         }
 
-        $stats = DB::table('aset')
-            ->selectRaw('COUNT(*) AS total_jenis')
-            ->selectRaw('COALESCE(SUM(jumlah), 0) AS total_unit')
-            ->selectRaw("COALESCE(SUM(CASE WHEN kondisi = 'Baik' THEN jumlah ELSE 0 END), 0) AS unit_baik")
-            ->selectRaw("COALESCE(SUM(CASE WHEN kondisi = 'Rusak' THEN jumlah ELSE 0 END), 0) AS unit_rusak")
-            ->selectRaw("COALESCE(SUM(CASE WHEN kondisi = 'Maintenance' THEN jumlah ELSE 0 END), 0) AS unit_maintenance")
-            ->first();
+        $stats = $this->inventoryStats();
 
         $categoryData = DB::table('aset')
             ->select('kategori')
@@ -142,6 +137,24 @@ class InventoryController extends Controller
             'start_item' => $totalAssets ? $assets->firstItem() : 0,
             'end_item' => $assets->lastItem() ?? 0,
         ]);
+    }
+
+    public function statistics(): JsonResponse
+    {
+        return response()
+            ->json($this->inventoryStats())
+            ->header('Cache-Control', 'no-store, private');
+    }
+
+    private function inventoryStats(): object
+    {
+        return DB::table('aset')
+            ->selectRaw('COUNT(*) AS total_jenis')
+            ->selectRaw('COALESCE(SUM(jumlah), 0) AS total_unit')
+            ->selectRaw("COALESCE(SUM(CASE WHEN kondisi = 'Baik' THEN jumlah ELSE 0 END), 0) AS unit_baik")
+            ->selectRaw("COALESCE(SUM(CASE WHEN kondisi = 'Rusak' THEN jumlah ELSE 0 END), 0) AS unit_rusak")
+            ->selectRaw("COALESCE(SUM(CASE WHEN kondisi = 'Maintenance' THEN jumlah ELSE 0 END), 0) AS unit_maintenance")
+            ->first();
     }
 
     public function store(Request $request): RedirectResponse

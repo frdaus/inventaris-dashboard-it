@@ -30,6 +30,45 @@ class InventoryTest extends TestCase
     {
         $this->get(route('dashboard'))
             ->assertRedirect(route('login'));
+
+        $this->get(route('dashboard.statistics'))
+            ->assertRedirect(route('login'));
+    }
+
+    #[Test]
+    public function authenticated_statistics_endpoint_returns_current_unit_totals(): void
+    {
+        $this->actingAs($this->admin);
+
+        Asset::create([
+            'kode_aset' => 'AST-001',
+            'nama_barang' => 'Laptop',
+            'kategori' => 'Komputer',
+            'jumlah' => 3,
+            'kondisi' => 'Baik',
+        ]);
+        Asset::create([
+            'kode_aset' => 'AST-002',
+            'nama_barang' => 'Printer',
+            'kategori' => 'Periferal',
+            'jumlah' => 2,
+            'kondisi' => 'Maintenance',
+        ]);
+        Asset::create([
+            'kode_aset' => 'AST-003',
+            'nama_barang' => 'Switch',
+            'kategori' => 'Network',
+            'jumlah' => 1,
+            'kondisi' => 'Rusak',
+        ]);
+
+        $this->getJson(route('dashboard.statistics'))
+            ->assertOk()
+            ->assertJsonPath('total_unit', 6)
+            ->assertJsonPath('total_jenis', 3)
+            ->assertJsonPath('unit_baik', 3)
+            ->assertJsonPath('unit_maintenance', 2)
+            ->assertJsonPath('unit_rusak', 1);
     }
 
     #[Test]

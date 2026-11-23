@@ -14,6 +14,8 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/', [InventoryController::class, 'dashboard'])
         ->name('dashboard');
+    Route::get('/dashboard/statistics', [InventoryController::class, 'statistics'])
+        ->name('dashboard.statistics');
     Route::post('/logout', [InventoryController::class, 'logout'])
         ->name('logout');
     Route::get('/export/excel', [InventoryController::class, 'exportExcel'])

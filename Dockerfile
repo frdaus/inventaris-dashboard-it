@@ -18,9 +18,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY laravel-app/ ./
-COPY static/style.css /var/www/html/public/assets/style.css
+COPY laravel-app/public/assets/style.css /var/www/html/public/assets/style.css
 COPY static/login.css /var/www/html/public/assets/login.css
-COPY static/dashboard.js /var/www/html/public/assets/dashboard.js
+COPY laravel-app/public/assets/dashboard.js /var/www/html/public/assets/dashboard.js
 
 RUN composer install --no-dev --no-interaction --no-progress --optimize-autoloader \
     && sed -ri 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf \
