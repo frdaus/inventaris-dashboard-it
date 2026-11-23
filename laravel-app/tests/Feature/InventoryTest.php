@@ -52,6 +52,8 @@ class InventoryTest extends TestCase
             ->assertOk()
             ->assertSee('Dashboard Inventaris')
             ->assertSee('AST-001')
+            ->assertSee('Nomor Seri')
+            ->assertSee('Garansi Sampai')
             ->assertSee('Komputer');
     }
 
@@ -69,6 +71,83 @@ class InventoryTest extends TestCase
         ])->assertRedirect(route('dashboard'));
 
         $this->assertStringStartsWith('$2y$', $this->admin->fresh()->password_hash);
+    }
+
+    #[Test]
+    public function hybrid_tracking_preserves_bulk_counts_and_validates_individual_units(): void
+    {
+        $this->actingAs($this->admin);
+
+        $this->post(route('tambah_aset'), [
+            'tracking_mode' => 'bulk',
+            'kode_aset' => 'BULK-001',
+            'nama_barang' => 'Kabel HDMI',
+            'kategori' => 'Aksesori',
+            'jumlah' => 5,
+            'kondisi' => 'Baik',
+        ])->assertRedirect(route('dashboard'));
+
+        $this->assertDatabaseHas('aset', [
+            'kode_aset' => 'BULK-001',
+            'jumlah' => 5,
+            'tracking_mode' => 'bulk',
+        ]);
+
+        $this->post(route('tambah_aset'), [
+            'tracking_mode' => 'individual',
+            'kode_aset' => 'LAP-001',
+            'nama_barang' => 'Laptop',
+            'kategori' => 'Komputer',
+            'merek' => 'Dell',
+            'model' => 'Latitude',
+            'nomor_seri' => 'SERIAL-001',
+            'nama_pemegang' => 'Ayu',
+            'departemen' => 'Finance',
+            'jumlah' => 1,
+            'kondisi' => 'Baik',
+            'tanggal_pembelian' => '2026-01-10',
+            'garansi_sampai' => '2028-01-10',
+        ])->assertRedirect(route('dashboard'));
+
+        $this->assertDatabaseHas('aset', [
+            'kode_aset' => 'LAP-001',
+            'tracking_mode' => 'individual',
+            'nomor_seri' => 'SERIAL-001',
+            'nama_pemegang' => 'Ayu',
+            'departemen' => 'Finance',
+        ]);
+
+        $asset = Asset::where('kode_aset', 'LAP-001')->firstOrFail();
+        $this->get(route('edit_aset', $asset->id))
+            ->assertOk()
+            ->assertSee('SERIAL-001')
+            ->assertSee('Garansi Sampai');
+
+        $this->get(route('dashboard', ['q' => 'SERIAL-001']))
+            ->assertOk()
+            ->assertSee('SERIAL-001</td>', false);
+
+        $this->get(route('dashboard', ['tracking_mode' => 'individual']))
+            ->assertOk()
+            ->assertSee('LAP-001</td>', false)
+            ->assertDontSee('BULK-001</td>', false);
+
+        $this->from(route('dashboard'))
+            ->post(route('tambah_aset'), [
+                'tracking_mode' => 'individual',
+                'kode_aset' => 'LAP-002',
+                'nama_barang' => 'Laptop',
+                'kategori' => 'Komputer',
+                'nomor_seri' => 'SERIAL-001',
+                'jumlah' => 2,
+                'kondisi' => 'Baik',
+                'tanggal_pembelian' => '2026-01-10',
+                'garansi_sampai' => '2025-01-10',
+            ])
+            ->assertRedirect(route('dashboard'))
+            ->assertSessionHasErrors(['jumlah', 'nomor_seri', 'garansi_sampai']);
+
+        $this->assertDatabaseMissing('aset', ['kode_aset' => 'LAP-002']);
     }
 
     #[Test]

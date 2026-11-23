@@ -16,6 +16,14 @@ class Asset extends Model
         'jumlah',
         'kondisi',
         'tanggal_masuk',
+        'tracking_mode',
+        'merek',
+        'model',
+        'nomor_seri',
+        'nama_pemegang',
+        'departemen',
+        'tanggal_pembelian',
+        'garansi_sampai',
     ];
 
     public $timestamps = false;
@@ -24,6 +32,8 @@ class Asset extends Model
     {
         return [
             'tanggal_masuk' => 'date:Y-m-d',
+            'tanggal_pembelian' => 'date:Y-m-d',
+            'garansi_sampai' => 'date:Y-m-d',
         ];
     }
 }

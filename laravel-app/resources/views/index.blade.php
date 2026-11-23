@@ -116,11 +116,53 @@
                                value="{{ old('kategori') }}"
                                placeholder="Laptop, Network, Server..." required>
                     </label>
+                    <label>Pola Pencatatan *
+                        <select name="tracking_mode" required>
+                            <option value="individual"
+                                @selected(old('tracking_mode', 'individual') === 'individual')>
+                                Per unit
+                            </option>
+                            <option value="bulk"
+                                @selected(old('tracking_mode') === 'bulk')>
+                                Berdasarkan jumlah
+                            </option>
+                        </select>
+                    </label>
+                    <div class="form-row">
+                        <label>Merek
+                            <input name="merek" maxlength="100"
+                                   value="{{ old('merek') }}"
+                                   placeholder="Contoh: Dell">
+                        </label>
+                        <label>Model
+                            <input name="model" maxlength="100"
+                                   value="{{ old('model') }}"
+                                   placeholder="Contoh: Latitude 5450">
+                        </label>
+                    </div>
+                    <label>Nomor Seri
+                        <input name="nomor_seri" maxlength="100"
+                               value="{{ old('nomor_seri') }}"
+                               placeholder="Khusus pencatatan per unit">
+                        <small>Nomor seri hanya untuk pencatatan per unit.</small>
+                    </label>
                     <label>Lokasi
                         <input name="lokasi" maxlength="100"
                                value="{{ old('lokasi') }}"
                                placeholder="Contoh: Ruang IT">
                     </label>
+                    <div class="form-row">
+                        <label>Pemegang
+                            <input name="nama_pemegang" maxlength="100"
+                                   value="{{ old('nama_pemegang') }}"
+                                   placeholder="Nama pengguna">
+                        </label>
+                        <label>Departemen
+                            <input name="departemen" maxlength="100"
+                                   value="{{ old('departemen') }}"
+                                   placeholder="Contoh: Finance">
+                        </label>
+                    </div>
                     <div class="form-row">
                         <label>Jumlah *
                             <input type="number" name="jumlah" min="1"
@@ -134,6 +176,16 @@
                                     </option>
                                 @endforeach
                             </select>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label>Tanggal Pembelian
+                            <input type="date" name="tanggal_pembelian"
+                                   value="{{ old('tanggal_pembelian') }}">
+                        </label>
+                        <label>Garansi Sampai
+                            <input type="date" name="garansi_sampai"
+                                   value="{{ old('garansi_sampai') }}">
                         </label>
                     </div>
                     <label>Tanggal Masuk
@@ -159,7 +211,7 @@
                         <label for="filter-q">Cari Aset</label>
                         <input id="filter-q" type="search" name="q"
                                value="{{ $search }}"
-                               placeholder="Kode, nama, atau lokasi...">
+                               placeholder="Kode, nama, seri, pemegang...">
                     </div>
                     <div class="filter-field">
                         <label for="filter-kategori">Kategori</label>
@@ -171,6 +223,20 @@
                                     {{ $item->kategori }}
                                 </option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-field">
+                        <label for="filter-tracking">Pola Pencatatan</label>
+                        <select id="filter-tracking" name="tracking_mode">
+                            <option value="">Semua Pola</option>
+                            <option value="individual"
+                                @selected($tracking_mode_filter === 'individual')>
+                                Per unit
+                            </option>
+                            <option value="bulk"
+                                @selected($tracking_mode_filter === 'bulk')>
+                                Berdasarkan jumlah
+                            </option>
                         </select>
                     </div>
                     <div class="filter-field">
@@ -193,10 +259,11 @@
                            'q' => $search,
                            'kategori' => $kategori_filter,
                            'kondisi' => $kondisi_filter,
+                           'tracking_mode' => $tracking_mode_filter,
                        ]) }}">
                         <span aria-hidden="true">📥</span> Export Excel
                     </a>
-                    @if ($search || $kategori_filter || $kondisi_filter)
+                    @if ($search || $kategori_filter || $kondisi_filter || $tracking_mode_filter)
                         <a class="clear-link" href="{{ route('dashboard') }}">Reset</a>
                     @endif
                 </form>
@@ -209,9 +276,14 @@
                             <th>Kode Aset</th>
                             <th>Nama Barang</th>
                             <th>Kategori</th>
+                            <th>Pencatatan</th>
+                            <th>Merek / Model</th>
+                            <th>Nomor Seri</th>
                             <th>Lokasi</th>
                             <th>Jumlah</th>
                             <th>Kondisi</th>
+                            <th>Pemegang / Departemen</th>
+                            <th>Garansi Sampai</th>
                             <th>Tanggal Masuk</th>
                             <th>Aksi</th>
                         </tr>
@@ -222,6 +294,11 @@
                                 <td class="asset-code">{{ $asset->kode_aset }}</td>
                                 <td>{{ $asset->nama_barang }}</td>
                                 <td>{{ $asset->kategori }}</td>
+                                <td>
+                                    {{ $asset->tracking_mode === 'individual' ? 'Per unit' : 'Berdasarkan jumlah' }}
+                                </td>
+                                <td>{{ trim(($asset->merek ?? '').' '.($asset->model ?? '')) ?: '-' }}</td>
+                                <td>{{ $asset->nomor_seri ?: '-' }}</td>
                                 <td>{{ $asset->lokasi ?: '-' }}</td>
                                 <td>{{ $asset->jumlah }}</td>
                                 <td>
@@ -229,6 +306,13 @@
                                         {{ $asset->kondisi ?? 'Belum diisi' }}
                                     </span>
                                 </td>
+                                <td>
+                                    {{ $asset->nama_pemegang ?: '-' }}
+                                    @if ($asset->departemen)
+                                        <br><small>{{ $asset->departemen }}</small>
+                                    @endif
+                                </td>
+                                <td>{{ $asset->garansi_sampai?->format('Y-m-d') ?? '-' }}</td>
                                 <td>{{ $asset->tanggal_masuk?->format('Y-m-d') ?? '-' }}</td>
                                 <td>
                                     <div style="display:flex; gap:6px;">
@@ -245,8 +329,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="empty-state">
-                                    @if ($search || $kategori_filter || $kondisi_filter)
+                                <td colspan="13" class="empty-state">
+                                    @if ($search || $kategori_filter || $kondisi_filter || $tracking_mode_filter)
                                         Tidak ada aset yang cocok dengan pencarian.
                                     @else
                                         Belum ada data inventaris. Tambahkan aset

@@ -40,10 +40,51 @@
                            value="{{ old('kategori', $asset->kategori) }}" required>
                 </label>
 
+                <label>Pola Pencatatan *
+                    <select name="tracking_mode" required>
+                        <option value="individual"
+                            @selected(old('tracking_mode', $asset->tracking_mode) === 'individual')>
+                            Per unit
+                        </option>
+                        <option value="bulk"
+                            @selected(old('tracking_mode', $asset->tracking_mode) === 'bulk')>
+                            Berdasarkan jumlah
+                        </option>
+                    </select>
+                </label>
+
+                <div class="form-row">
+                    <label>Merek
+                        <input name="merek" maxlength="100"
+                               value="{{ old('merek', $asset->merek) }}">
+                    </label>
+                    <label>Model
+                        <input name="model" maxlength="100"
+                               value="{{ old('model', $asset->model) }}">
+                    </label>
+                </div>
+
+                <label>Nomor Seri
+                    <input name="nomor_seri" maxlength="100"
+                           value="{{ old('nomor_seri', $asset->nomor_seri) }}">
+                    <small>Isi hanya untuk pencatatan per unit.</small>
+                </label>
+
                 <label>Lokasi
                     <input name="lokasi" maxlength="100"
                            value="{{ old('lokasi', $asset->lokasi) }}">
                 </label>
+
+                <div class="form-row">
+                    <label>Pemegang
+                        <input name="nama_pemegang" maxlength="100"
+                               value="{{ old('nama_pemegang', $asset->nama_pemegang) }}">
+                    </label>
+                    <label>Departemen
+                        <input name="departemen" maxlength="100"
+                               value="{{ old('departemen', $asset->departemen) }}">
+                    </label>
+                </div>
 
                 <div class="form-row">
                     <label>Jumlah *
@@ -60,6 +101,17 @@
                                 </option>
                             @endforeach
                         </select>
+                    </label>
+                </div>
+
+                <div class="form-row">
+                    <label>Tanggal Pembelian
+                        <input type="date" name="tanggal_pembelian"
+                               value="{{ old('tanggal_pembelian', $asset->tanggal_pembelian?->format('Y-m-d')) }}">
+                    </label>
+                    <label>Garansi Sampai
+                        <input type="date" name="garansi_sampai"
+                               value="{{ old('garansi_sampai', $asset->garansi_sampai?->format('Y-m-d')) }}">
                     </label>
                 </div>
 

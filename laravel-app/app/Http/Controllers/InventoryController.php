@@ -71,6 +71,10 @@ class InventoryController extends Controller
         if (! in_array($conditionFilter, self::CONDITIONS, true)) {
             $conditionFilter = '';
         }
+        $trackingModeFilter = (string) $request->query('tracking_mode', '');
+        if (! in_array($trackingModeFilter, ['individual', 'bulk'], true)) {
+            $trackingModeFilter = '';
+        }
 
         $stats = DB::table('aset')
             ->selectRaw('COUNT(*) AS total_jenis')
@@ -102,11 +106,17 @@ class InventoryController extends Controller
                     $searchQuery->where('kode_aset', 'like', $like)
                         ->orWhere('nama_barang', 'like', $like)
                         ->orWhere('kategori', 'like', $like)
-                        ->orWhere('lokasi', 'like', $like);
+                        ->orWhere('lokasi', 'like', $like)
+                        ->orWhere('merek', 'like', $like)
+                        ->orWhere('model', 'like', $like)
+                        ->orWhere('nomor_seri', 'like', $like)
+                        ->orWhere('nama_pemegang', 'like', $like)
+                        ->orWhere('departemen', 'like', $like);
                 });
             })
             ->when($categoryFilter !== '', fn ($query) => $query->where('kategori', $categoryFilter))
             ->when($conditionFilter !== '', fn ($query) => $query->where('kondisi', $conditionFilter))
+            ->when($trackingModeFilter !== '', fn ($query) => $query->where('tracking_mode', $trackingModeFilter))
             ->orderByDesc('id');
 
         $totalAssets = (clone $assetsQuery)->count();
@@ -114,7 +124,7 @@ class InventoryController extends Controller
         $totalPages = max(1, (int) ceil($totalAssets / $perPage));
         $page = min(max(1, $request->integer('page', 1)), $totalPages);
         $assets = $assetsQuery->paginate($perPage, ['*'], 'page', $page)
-            ->appends($request->only(['q', 'kategori', 'kondisi']));
+            ->appends($request->only(['q', 'kategori', 'kondisi', 'tracking_mode']));
 
         return view('index', [
             'stats' => $stats,
@@ -124,6 +134,7 @@ class InventoryController extends Controller
             'search' => $search,
             'kategori_filter' => $categoryFilter,
             'kondisi_filter' => $conditionFilter,
+            'tracking_mode_filter' => $trackingModeFilter,
             'page' => $page,
             'per_page' => $perPage,
             'total_assets' => $totalAssets,
@@ -135,19 +146,10 @@ class InventoryController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validator = Validator::make($request->all(), [
-            'kode_aset' => ['required', 'string', 'max:30', 'unique:aset,kode_aset'],
-            'nama_barang' => ['required', 'string', 'max:100'],
-            'kategori' => ['required', 'string', 'max:50'],
-            'lokasi' => ['nullable', 'string', 'max:100'],
-            'jumlah' => ['required', 'integer', 'min:1'],
-            'kondisi' => ['required', Rule::in(self::CONDITIONS)],
-            'tanggal_masuk' => ['nullable', 'date'],
-        ], [
-            'kode_aset.unique' => 'Kode aset sudah digunakan. Gunakan kode yang berbeda.',
-            'jumlah.min' => 'Jumlah harus berupa bilangan bulat minimal 1.',
-            'kondisi.in' => 'Pilihan kondisi tidak valid.',
+        $request->merge([
+            'tracking_mode' => $request->input('tracking_mode', 'bulk'),
         ]);
+        $validator = $this->assetValidator($request);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
@@ -202,19 +204,10 @@ class InventoryController extends Controller
         $asset = Asset::find($asset_id);
         abort_if(! $asset, 404, 'Aset tidak ditemukan.');
 
-        $validator = Validator::make($request->all(), [
-            'kode_aset' => ['required', 'string', 'max:30', Rule::unique('aset', 'kode_aset')->ignore($asset->id)],
-            'nama_barang' => ['required', 'string', 'max:100'],
-            'kategori' => ['required', 'string', 'max:50'],
-            'lokasi' => ['nullable', 'string', 'max:100'],
-            'jumlah' => ['required', 'integer', 'min:1'],
-            'kondisi' => ['required', Rule::in(self::CONDITIONS)],
-            'tanggal_masuk' => ['nullable', 'date'],
-        ], [
-            'kode_aset.unique' => 'Kode aset sudah digunakan aset lain.',
-            'jumlah.min' => 'Jumlah harus minimal 1.',
-            'kondisi.in' => 'Kondisi aset tidak valid.',
+        $request->merge([
+            'tracking_mode' => $request->input('tracking_mode', $asset->tracking_mode),
         ]);
+        $validator = $this->assetValidator($request, $asset);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
@@ -244,6 +237,10 @@ class InventoryController extends Controller
         if (! in_array($conditionFilter, self::CONDITIONS, true)) {
             $conditionFilter = '';
         }
+        $trackingModeFilter = (string) $request->query('tracking_mode', '');
+        if (! in_array($trackingModeFilter, ['individual', 'bulk'], true)) {
+            $trackingModeFilter = '';
+        }
 
         $assets = Asset::query()
             ->when($search !== '', function ($query) use ($search): void {
@@ -252,11 +249,17 @@ class InventoryController extends Controller
                     $searchQuery->where('kode_aset', 'like', $like)
                         ->orWhere('nama_barang', 'like', $like)
                         ->orWhere('kategori', 'like', $like)
-                        ->orWhere('lokasi', 'like', $like);
+                        ->orWhere('lokasi', 'like', $like)
+                        ->orWhere('merek', 'like', $like)
+                        ->orWhere('model', 'like', $like)
+                        ->orWhere('nomor_seri', 'like', $like)
+                        ->orWhere('nama_pemegang', 'like', $like)
+                        ->orWhere('departemen', 'like', $like);
                 });
             })
             ->when($categoryFilter !== '', fn ($query) => $query->where('kategori', $categoryFilter))
             ->when($conditionFilter !== '', fn ($query) => $query->where('kondisi', $conditionFilter))
+            ->when($trackingModeFilter !== '', fn ($query) => $query->where('tracking_mode', $trackingModeFilter))
             ->orderByDesc('id')
             ->get([
                 'kode_aset',
@@ -266,6 +269,14 @@ class InventoryController extends Controller
                 'jumlah',
                 'kondisi',
                 'tanggal_masuk',
+                'tracking_mode',
+                'merek',
+                'model',
+                'nomor_seri',
+                'nama_pemegang',
+                'departemen',
+                'tanggal_pembelian',
+                'garansi_sampai',
             ]);
 
         $workbook = new Spreadsheet;
@@ -275,33 +286,63 @@ class InventoryController extends Controller
             'Kode Aset',
             'Nama Barang',
             'Kategori',
+            'Pencatatan',
+            'Merek',
+            'Model',
+            'Nomor Seri',
             'Lokasi',
             'Jumlah',
             'Kondisi',
+            'Pemegang',
+            'Departemen',
+            'Tanggal Pembelian',
+            'Garansi Sampai',
             'Tanggal Masuk',
         ], null, 'A1');
 
-        foreach (['A1:G1'] as $range) {
-            $sheet->getStyle($range)->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
-            $sheet->getStyle($range)->getFill()
-                ->setFillType(Fill::FILL_SOLID)
-                ->getStartColor()->setARGB('FF1F3A5F');
-            $sheet->getStyle($range)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        }
+        $sheet->getStyle('A1:O1')->getFont()->setBold(true)->getColor()->setARGB('FFFFFFFF');
+        $sheet->getStyle('A1:O1')->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('FF1F3A5F');
+        $sheet->getStyle('A1:O1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         foreach ($assets as $index => $asset) {
             $sheet->fromArray([
                 $asset->kode_aset,
                 $asset->nama_barang,
                 $asset->kategori,
+                $asset->tracking_mode === 'individual' ? 'Per unit' : 'Berdasarkan jumlah',
+                $asset->merek ?? '',
+                $asset->model ?? '',
+                $asset->nomor_seri ?? '',
                 $asset->lokasi ?? '',
                 $asset->jumlah,
                 $asset->kondisi ?? '',
+                $asset->nama_pemegang ?? '',
+                $asset->departemen ?? '',
+                $asset->tanggal_pembelian?->format('Y-m-d') ?? '',
+                $asset->garansi_sampai?->format('Y-m-d') ?? '',
                 $asset->tanggal_masuk?->format('Y-m-d') ?? '',
             ], null, 'A'.($index + 2));
         }
 
-        foreach (['A' => 18, 'B' => 28, 'C' => 20, 'D' => 24, 'E' => 12, 'F' => 18, 'G' => 18] as $column => $width) {
+        foreach ([
+            'A' => 18,
+            'B' => 28,
+            'C' => 20,
+            'D' => 20,
+            'E' => 18,
+            'F' => 18,
+            'G' => 24,
+            'H' => 24,
+            'I' => 12,
+            'J' => 18,
+            'K' => 24,
+            'L' => 22,
+            'M' => 18,
+            'N' => 18,
+            'O' => 18,
+        ] as $column => $width) {
             $sheet->getColumnDimension($column)->setWidth($width);
         }
         $sheet->freezePane('A2');
@@ -327,6 +368,67 @@ class InventoryController extends Controller
             'asset_code' => $asset->kode_aset,
             'asset_name' => $asset->nama_barang,
             'description' => $description,
+        ]);
+    }
+
+    private function assetValidator(Request $request, ?Asset $asset = null): \Illuminate\Validation\Validator
+    {
+        $serialRule = Rule::unique('aset', 'nomor_seri');
+        if ($asset) {
+            $serialRule->ignore($asset->id);
+        }
+
+        $trackingMode = $request->input('tracking_mode');
+
+        return Validator::make($request->all(), [
+            'tracking_mode' => ['required', Rule::in(['individual', 'bulk'])],
+            'kode_aset' => [
+                'required',
+                'string',
+                'max:30',
+                Rule::unique('aset', 'kode_aset')->ignore($asset?->id),
+            ],
+            'nama_barang' => ['required', 'string', 'max:100'],
+            'kategori' => ['required', 'string', 'max:50'],
+            'merek' => ['nullable', 'string', 'max:100'],
+            'model' => ['nullable', 'string', 'max:100'],
+            'nomor_seri' => [
+                'nullable',
+                'string',
+                'max:100',
+                $serialRule,
+                Rule::prohibitedIf($trackingMode === 'bulk'),
+            ],
+            'lokasi' => ['nullable', 'string', 'max:100'],
+            'jumlah' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::when($trackingMode === 'individual', ['in:1']),
+            ],
+            'kondisi' => ['required', Rule::in(self::CONDITIONS)],
+            'nama_pemegang' => ['nullable', 'string', 'max:100'],
+            'departemen' => ['nullable', 'string', 'max:100'],
+            'tanggal_pembelian' => ['nullable', 'date'],
+            'garansi_sampai' => [
+                'nullable',
+                'date',
+                Rule::when($request->filled('tanggal_pembelian'), ['after_or_equal:tanggal_pembelian']),
+            ],
+            'tanggal_masuk' => ['nullable', 'date'],
+        ], [
+            'tracking_mode.in' => 'Pilih pencatatan per unit atau berdasarkan jumlah.',
+            'kode_aset.unique' => $asset
+                ? 'Kode aset sudah digunakan aset lain.'
+                : 'Kode aset sudah digunakan. Gunakan kode yang berbeda.',
+            'jumlah.min' => $asset
+                ? 'Jumlah harus minimal 1.'
+                : 'Jumlah harus berupa bilangan bulat minimal 1.',
+            'jumlah.in' => 'Aset per unit harus memiliki jumlah tepat 1.',
+            'kondisi.in' => $asset ? 'Kondisi aset tidak valid.' : 'Pilihan kondisi tidak valid.',
+            'nomor_seri.unique' => 'Nomor seri sudah terdaftar pada aset lain.',
+            'nomor_seri.prohibited' => 'Nomor seri hanya dapat diisi untuk pencatatan per unit.',
+            'garansi_sampai.after_or_equal' => 'Tanggal garansi tidak boleh sebelum tanggal pembelian.',
         ]);
     }
 }

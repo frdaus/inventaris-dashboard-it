@@ -29,6 +29,14 @@ Jika digunakan di server baru, atur `APP_KEY` secara aman di environment;
 secara lokal, jika belum diatur, Laravel memakai kunci turunan dari
 `FLASK_SECRET_KEY` yang sudah ada.
 
+## Pencatatan aset hybrid
+
+Aset baru secara default dicatat **per unit** dengan jumlah `1`; nomor seri
+bersifat opsional tetapi harus unik jika diisi. Aksesori atau barang stok dapat
+dipilih **berdasarkan jumlah**. Data lama otomatis tetap memakai mode jumlah,
+sehingga jumlah aset yang sudah tersimpan tidak berubah. Form aset juga
+mencakup merek/model, pemegang, departemen, tanggal pembelian, dan masa garansi.
+
 ## Pengembangan dan pengujian
 
 ```bash
