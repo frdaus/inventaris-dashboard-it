@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Aset</title>
-    <link rel="stylesheet" href="{{ asset('assets/style.css') }}">
+    <link rel="stylesheet"
+          href="{{ asset('assets/style.css') }}?v={{ filemtime(public_path('assets/style.css')) }}">
 </head>
 <body>
     <main class="main" style="margin-left:0; max-width:800px;">
@@ -120,10 +121,12 @@
                            value="{{ old('tanggal_masuk', $asset->tanggal_masuk?->format('Y-m-d')) }}">
                 </label>
 
-                <button type="submit" class="primary-button">
-                    Simpan Perubahan
-                </button>
-                <a href="{{ route('dashboard') }}">Kembali ke Dashboard</a>
+                <div class="asset-form-actions">
+                    <a class="primary-button" href="{{ route('dashboard') }}">Kembali ke Dashboard</a>
+                    <button type="submit" class="primary-button">
+                        Simpan Perubahan
+                    </button>
+                </div>
             </form>
         </section>
     </main>
